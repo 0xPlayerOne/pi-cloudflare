@@ -8,38 +8,38 @@ helper** in a single pi package.
   `wrangler`, `workers-best-practices`, `durable-objects`, `agents-sdk`,
   `cloudflare-email-service`, `cloudflare-one`, `cloudflare-one-migrations`,
   `sandbox-stable`, `sandbox-next`, `sandbox-migrate-to-next`,
-  `turnstile-spin`). Refresh with `scripts/sync-skills.sh`
-  (kept as a script, not vendored twice).
+  `turnstile-spin`). Refresh with `scripts/sync-skills.sh`.
 - **MCP tools** — all five official Cloudflare MCP servers, proxied with
   per-server prefixes (a server that is down or unauthorized is skipped with
   a warning instead of failing the session):
 
-  | Tools           | Server                                          |
-  | --------------- | ----------------------------------------------- |
-  | `cf_api_*`      | Cloudflare API (2,500+ endpoints)               |
-  | `cf_docs_*`     | Developer documentation (works without a token) |
-  | `cf_bindings_*` | Workers primitives guidance                     |
-  | `cf_builds_*`   | Workers Builds insights                         |
-  | `cf_obs_*`      | Workers logs/metrics/traces                     |
+  | Tools        | Server                                  |
+  | ------------ | --------------------------------------- |
+  | `cf_api_*`   | Cloudflare API (2,500+ endpoints)       |
+  | `cf_docs_*`  | Developer documentation (no auth needed)|
+  | `cf_bindings_*` | Workers primitives guidance          |
+  | `cf_builds_*`| Workers Builds insights                 |
+  | `cf_obs_*`   | Workers logs/metrics/traces             |
+
+Requires pi with package support, Node 20.19+ (or 22.12+), and network
+access. No browser, wrangler CLI, or API token needed to install; the docs
+tools work immediately after install.
 
 ## Install
 
 ```bash
-pi install npm:pi-cloudflare   # once published
-pi install /path/to/pi-cloudflare  # from source
+pi install npm:pi-cloudflare
 ```
 
-Tools and skills register on the **next** session start. `web-perf` is
-intentionally not vendored: keep your local customized copy (upstream would
-clobber environment-specific rules).
-
-Tools and skills register on the **next** session start.
+Tools and skills register on the **next** session start. (`web-perf` is
+intentionally not vendored: keep a local customized copy instead, since the
+upstream version would clobber environment-specific rules.)
 
 ## Authenticate (one-time browser OAuth)
 
 ```bash
-pi-cloudflare-setup                    # authorize missing servers
-pi-cloudflare-setup --only builds    # re-auth specific servers
+npx -p pi-cloudflare pi-cloudflare-setup                    # authorize missing servers
+npx -p pi-cloudflare pi-cloudflare-setup --only builds    # re-auth specific servers
 ```
 
 Each Cloudflare MCP server is its own OAuth issuer, so approval happens
