@@ -1,6 +1,6 @@
 {
   "name": "pi-cloudflare",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Pi extension proxying Cloudflare's official MCP servers (API, docs, bindings, builds, observability) with cf_ prefixed tools.",
   "keywords": [
     "pi-package",
