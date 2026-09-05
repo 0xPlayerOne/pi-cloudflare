@@ -9,7 +9,9 @@ CHANGELOG.md
 .github/actions/
 
 # Repository-specific rules
-skills/
 node_modules/
 dist/
 coverage/
+# Vendored upstream skill content (synced from cloudflare/skills);
+# never reformat.
+skills/
