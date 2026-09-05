@@ -29,6 +29,10 @@ pi install npm:pi-cloudflare   # once published
 pi install /path/to/pi-cloudflare  # from source
 ```
 
+Tools and skills register on the **next** session start. `web-perf` is
+intentionally not vendored: keep your local customized copy (upstream would
+clobber environment-specific rules).
+
 Tools and skills register on the **next** session start.
 
 ## Authenticate (one-time browser OAuth)
