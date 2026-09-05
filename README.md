@@ -13,13 +13,13 @@ helper** in a single pi package.
   per-server prefixes (a server that is down or unauthorized is skipped with
   a warning instead of failing the session):
 
-  | Tools        | Server                                  |
-  | ------------ | --------------------------------------- |
-  | `cf_api_*`   | Cloudflare API (2,500+ endpoints)       |
-  | `cf_docs_*`  | Developer documentation (no auth needed)|
-  | `cf_bindings_*` | Workers primitives guidance          |
-  | `cf_builds_*`| Workers Builds insights                 |
-  | `cf_obs_*`   | Workers logs/metrics/traces             |
+  | Tools           | Server                                   |
+  | --------------- | ---------------------------------------- |
+  | `cf_api_*`      | Cloudflare API (2,500+ endpoints)        |
+  | `cf_docs_*`     | Developer documentation (no auth needed) |
+  | `cf_bindings_*` | Workers primitives guidance              |
+  | `cf_builds_*`   | Workers Builds insights                  |
+  | `cf_obs_*`      | Workers logs/metrics/traces              |
 
 Requires pi with package support, Node 20.19+ (or 22.12+), and network
 access. No browser, wrangler CLI, or API token needed to install; the docs
