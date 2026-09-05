@@ -9,7 +9,7 @@
     "cloudflare",
     "mcp"
   ],
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": "0xPlayerOne",
   "repository": {
     "type": "git",
@@ -51,6 +51,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "format:check": "prettier --check .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "prepublishOnly": "npm run build",
     "test": "node --test test/config.test.mjs test/servers.test.mjs test/proxy.test.mjs test/oauth.test.mjs test/token-store.test.mjs",
@@ -62,6 +63,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.0"
   }
 }

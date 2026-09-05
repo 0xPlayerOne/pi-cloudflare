@@ -69,3 +69,9 @@ In `~/.pi/agent/settings.json`:
 npm install
 npm test    # typecheck + unit tests (mocked, no network)
 ```
+
+## License
+
+MIT for this package's own code (see LICENSE). Vendored skill content
+under `skills/` remains under its upstream Apache License, Version 2.0
+(see NOTICE).
