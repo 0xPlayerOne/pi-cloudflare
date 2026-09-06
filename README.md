@@ -101,6 +101,24 @@ Avoid re-running full setup on a schedule: each fresh approval can rotate
 away tokens other sessions still hold. Re-authenticate single servers with
 `--only` and only when told to.
 
+## Wrangler CLI vs MCP tools
+
+Both are first-class; pick per task. Credentials do not transfer: wrangler
+bearers are recognized by MCP servers but scope-rejected (verified live),
+so use each where it wins:
+
+| Task | Use |
+|---|---|
+| Deploys, `tail -f`, KV/R2/D1 CLIs, scripting | `wrangler` in bash (durable months-long login) |
+| Endpoint discovery, docs search | `cf_api_search`, `cf_docs_*` |
+| Typed CRUD on bindings with agent-shaped I/O | `cf_bindings_*` |
+| Builds history, log exploration | `cf_builds_*`, `cf_obs_*` |
+| Arbitrary API paths with static credentials | `cf_api_execute` + `apiToken` |
+
+Wrangler's months-long session comes from its first-party OAuth grant; MCP
+servers require their own per-server grants (verified: cross-use fails
+closed on scope). They complement; neither replaces the other.
+
 ## Troubleshooting
 
 | Symptom                                      | Likely cause                            | Fix                                                                                                                  |
