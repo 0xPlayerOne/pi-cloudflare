@@ -19,14 +19,25 @@ Every permission row has **three** dropdowns: scope | permission | **level**. A 
 - UI `Edit` = API `Write`. UI `Read` = API `Read`.
 - Commit check per row: snapshot shows `value="<Group>"`, the level shows `Edit`/`Read` (not `Select...`), and no error text sits under the row.
 
-## UI fast path
+## UI fast path (batched, not step-verified)
 
-1. My Profile (avatar) → API Tokens → Create Token → start from the template the task needs (usually Edit Cloudflare Workers).
-2. Add each extra group with Add more → permission box: click it, `type_text` to filter, ArrowDown + Enter to commit (trusted keystrokes commit reliably; synthetic DOM clicks can look committed while leaving the row invalid).
-3. Level box: click its combobox uid, ArrowDown + Enter on the option. If the menu opens empty, the permission did **not** really commit — redo step 2, do not proceed.
-4. Account Resources: Include + every managed account. Zone Resources: include (needed for Workers Routes). Leave Client IP filtering off and TTL unset unless the task says otherwise.
-5. Continue to summary → **read back the full permission/resource list** → only then Create.
-6. The secret is shown **once**. A later GET never returns it — if you miss it, delete the token and recreate.
+Move fast row by row. One snapshot per row to learn its uids, then drive its controls without re-reading until the row is done. Each permission is four quick steps:
+
+1. Click **Add more** (fresh uid — rows shift uids on every structural change).
+2. Scope: leave `Account` unless the task needs otherwise.
+3. Permission box: click it, `type_text` to filter, ArrowDown + Enter to commit. Trusted keystrokes commit reliably; synthetic DOM clicks can look committed (`value=` set) while leaving the row invalid — prefer keystrokes.
+4. Level box: click its combobox, ArrowDown + Enter on Edit/Read. UI `Edit` = API `Write`.
+
+Do not snapshot between steps 1–4. Piggyback verification for free: the next row's snapshot shows the previous row's committed state — glance at it while grabbing the next row's uids. If a level menu opens empty, that row's permission did **not** really commit — redo its step 3 on the spot, then resume speed.
+
+Then, once, at the end:
+
+5. Account Resources: Include + every managed account. Zone Resources: include (needed for Workers Routes). Leave Client IP filtering off and TTL unset unless the task says otherwise.
+6. Screenshot the whole builder and **read back every row** (scope + permission + level). Missing or `Select...` rows get added/fixed now, before proceeding — never after Create.
+7. Continue to summary → confirm the summary matches the read-back → Create.
+8. The secret is shown **once**. A later GET never returns it — capture immediately (roll skill covers recovery).
+
+Hiccup protocol: on any failure (stale uid, empty menu, vanished row), take one screenshot plus one fresh snapshot, resolve from what you actually see, and continue. Never retry-loop blindly, and never batch assumed successes across a failure — re-verify that row, then resume speed.
 
 ## API fast path (when the UI fights)
 
