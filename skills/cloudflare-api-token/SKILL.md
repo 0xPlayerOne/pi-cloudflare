@@ -35,7 +35,7 @@ Same-origin `/api/v4/*` in page context carries the session:
 - `GET /api/v4/user/tokens/permission_groups?per_page=100` — resolve every group by exact name first (`D1 Write`, not `D1 Edit`). All ~400 come back in one page.
 - Mirror an existing token's policy split (`GET /api/v4/user/tokens`): zone-scoped groups under `com.cloudflare.api.account.zone.*`, user groups under `com.cloudflare.api.user.<id>`, account groups per account id (or the account wildcard). A single policy mixing scopes fails with `Failed common permission check`.
 - `POST /api/v4/user/tokens` with `{name, policies}` → capture `result.value` from **that** response.
-- Verify with the token itself (`GET /user`, one scoped read per new group), hand the secret over once, destroy every local copy (`chmod 600` while it lives, then delete). Rollback is delete + recreate.
+- Verify with the token itself (`GET /user`, one scoped read per new group — full matrix below), hand the secret over once, destroy every local copy (`chmod 600` while it lives, then delete). Rollback is dashboard roll, not delete + recreate (there is no public roll route — see `skills/cloudflare-token-roll/SKILL.md`).
 
 ## React-select mechanics (dash dropdowns)
 
@@ -43,8 +43,10 @@ Same-origin `/api/v4/*` in page context carries the session:
 - Never reuse coordinates across scrolls or snapshots: annotate → click immediately, then re-verify. Stale-coordinate clicks land on neighboring ✕ buttons and delete finished rows.
 - `evaluate_script` DOM clicks can set display text without committing React state. Treat `value=` in a snapshot as necessary but not sufficient — sufficiency is the level menu opening with real options.
 
-## After creation
+## After creation: validation matrix (live-proven 2026-09-06)
 
 - Run `CLOUDFLARE_API_TOKEN=<paste-once> node scripts/verify-api-token.mjs` (identity, token status, Workers scripts read).
+- Then one live read per relied-upon group, all passing on the reference token: `GET /user`, `GET /accounts`, Workers scripts list, KV namespaces list, R2 buckets list, D1 databases list, Hyperdrive configs list, zones list, zone routes list, account read, memberships list, audit-logs list (proves Logs Read).
+- Known non-gaps, do not chase: `GET /user/tokens/:id` returns `9109` by design (tokens cannot manage tokens); zone-analytics `10000` without the Zone Analytics group is correct least privilege (observability rollups go through the separate obs MCP, not this token); Workers Tail needs a websocket (group presence + dashboard UI is the check).
 - Template drift is real: the dashboard template grows over time (Builds/Agents/Containers/Observability/Pages appeared after the doc was written). Enumerate required groups per task from `docs/api-token.md`; never assume the template equals the need.
 - A 403 naming a missing group later means extend-then-verify, not a new token: same flow, one more row.
