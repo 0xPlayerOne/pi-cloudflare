@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.2.0...pi-cloudflare-v0.2.1) (2026-09-06)
+
+
+### Maintenance
+
+* **sync:** adopt code-foundry v1.0.2 baseline ([29c2805](https://github.com/0xPlayerOne/pi-cloudflare/commit/29c280517af489881da729ad14a5ca24b92ed849))
+
 ## [0.2.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.1.0...pi-cloudflare-v0.2.0) (2026-09-05)
 
 
