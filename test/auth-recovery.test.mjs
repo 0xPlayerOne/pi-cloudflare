@@ -38,6 +38,12 @@ describe('reauthHint', () => {
     assert.match(hint, /pi-cloudflare-setup --only builds/)
     assert.doesNotMatch(hint, /--oauth/)
   })
+
+  it('offers the persistent API-token alternative with its skill', () => {
+    const hint = reauthHint('api')
+    assert.match(hint, /API token/)
+    assert.match(hint, /cloudflare-auth-setup/)
+  })
 })
 
 describe('syncFromFile', () => {

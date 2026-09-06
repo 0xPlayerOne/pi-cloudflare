@@ -28,6 +28,10 @@ Fetch the **latest** information before citing specific numbers, API signatures,
 
 When a reference file and the docs disagree, **trust the docs**. This is especially important for: numeric limits, pricing tiers, type signatures, and configuration options.
 
+## Authentication First
+
+Before any Cloudflare task, load the **cloudflare-auth-setup** skill when auth is unknown, expired, or rejected. It triages state (API token → OAuth → unauthenticated), asks the user once to choose persistent token vs temporary OAuth, adapts to environments with or without browser automation, and proves access before the real task. Token lifecycle details live in **cloudflare-api-token** (create), **cloudflare-token-roll** (lost/leaked secret), and **cloudflare-token-scopes** (add/remove groups).
+
 ## Quick Decision Trees
 
 ### "I need feature flags"
