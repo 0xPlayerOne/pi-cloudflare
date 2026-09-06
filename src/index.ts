@@ -88,8 +88,10 @@ function warn(message: string): void {
 export function reauthHint(serverId: string): string {
   return (
     `${serverId} needs re-authentication (token expired, revoked, or never granted). ` +
-    `Run in a terminal (approve in the browser when it opens): ` +
-    `npx -p pi-cloudflare pi-cloudflare-setup --only ${serverId}`
+    `For temporary access, run in a terminal (approve in the browser when it opens): ` +
+    `npx -p pi-cloudflare pi-cloudflare-setup --only ${serverId}. ` +
+    `For persistent access across sessions, create an API token instead — ` +
+    `see the cloudflare-auth-setup skill (it asks once, then sets up either path).`
   )
 }
 
