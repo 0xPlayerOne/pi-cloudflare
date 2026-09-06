@@ -65,6 +65,45 @@ In `~/.pi/agent/settings.json`:
 }
 ```
 
+## Persistent auth (a month and beyond)
+
+Browser OAuth access tokens live about an hour; the extension refreshes
+them silently on every session start and before every tool call, so daily
+use never re-authenticates. When refresh itself is rejected (revoked,
+rotated away by a parallel login, or expired), agents get an exact
+recovery command instead of a dead end — and a `cf_<server>_reauthenticate`
+tool appears with the same instructions.
+
+Two levers for longer-lived credentials:
+
+1. **Static API token (recommended for automation).** A Cloudflare API
+   token never expires. Set it once and the `api` server skips OAuth
+   entirely:
+
+   ```jsonc
+   {
+     "pi-cloudflare": {
+       "apiToken": "${CLOUDFLARE_API_TOKEN}", // env expansion supported
+     },
+   }
+   ```
+
+   Create one at dash.cloudflare.com → Manage Account → API Tokens with
+   the scopes your agents need. Other servers stay on browser OAuth.
+2. **Request a longer refresh grant.** Some issuers honor
+   `offline_access` for extended refresh lifetimes:
+
+   ```jsonc
+   { "pi-cloudflare": { "oauthScope": "offline_access" } }
+   ```
+
+   Or per re-auth: `pi-cloudflare-setup --only api --scope offline_access`.
+   If an issuer rejects the scope, drop it — support varies.
+
+Avoid re-running full setup on a schedule: each fresh approval can rotate
+away tokens other sessions still hold. Re-authenticate single servers with
+`--only` and only when told to.
+
 ## Troubleshooting
 
 | Symptom                                      | Likely cause                            | Fix                                                                                                                  |

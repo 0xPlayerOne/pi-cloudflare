@@ -1,6 +1,7 @@
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { readFileSync } from 'node:fs'
+import { Type } from 'typebox'
 
 import { connectServer, type ServerConnection } from './client.js'
 import { refreshAccessToken } from './oauth.js'
@@ -34,13 +35,42 @@ interface ServerEntry {
   definition: CloudflareServerDefinition
   connection?: ServerConnection
   stored?: StoredServerTokens
+  /** Static bearer token (api server only): never expires, never refreshes. */
+  staticToken?: string
+  timeoutMs: number
+}
+
+async function reconnect(entry: ServerEntry): Promise<void> {
+  await entry.connection?.close().catch(() => undefined)
+  entry.connection = await connectServer(entry.definition, {
+    apiToken: entry.staticToken ?? entry.stored?.accessToken,
+    timeoutMs: entry.timeoutMs,
+  })
+}
+
+function expandEnvVars(value: unknown): unknown {
+  if (typeof value === 'string') {
+    return value.replace(/\$\{([^}]+)\}/g, (_match, expr: string) => {
+      const [name, ...rest] = expr.split(':-')
+      return process.env[name] ?? rest.join(':-')
+    })
+  }
+  if (Array.isArray(value)) return value.map(expandEnvVars)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, expandEnvVars(entry)])
+    )
+  }
+  return value
 }
 
 function loadUserConfig(): PiCloudflareConfig | undefined {
   try {
     const raw = readFileSync(join(homedir(), '.pi', 'agent', 'settings.json'), 'utf8')
     const parsed = JSON.parse(raw) as PiSettingsFile
-    return parsed['pi-cloudflare']
+    const section = parsed['pi-cloudflare']
+    if (!section || typeof section !== 'object') return undefined
+    return expandEnvVars(section) as PiCloudflareConfig
   } catch {
     return undefined
   }
@@ -50,11 +80,27 @@ function warn(message: string): void {
   console.warn(`[pi-cloudflare] ${message}`)
 }
 
-/** Refresh an OAuth token that is expired (or nearly so), persisting the result. */
-async function ensureFreshToken(entry: ServerEntry): Promise<string | undefined> {
+/** Exact command that re-authorizes one server; shown to agents, never guessed. */
+export function reauthHint(serverId: string): string {
+  return (
+    `${serverId} needs re-authentication (token expired, revoked, or never granted). ` +
+    `Run in a terminal (approve in the browser when it opens): ` +
+    `npx -p pi-cloudflare pi-cloudflare-setup --only ${serverId}`
+  )
+}
+
+/** True when a failure smells like rejected credentials rather than a broken server. */
+export function isAuthFailure(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error)
+  return /\b401\b|\b403\b|unauthorized|invalid_token|invalid_grant|token refresh failed|expired|forbidden|authenticate/i.test(
+    message
+  )
+}
+
+/** Refresh unconditionally (caller decided the token is rejected). Persists and reconnects. */
+async function refreshNow(entry: ServerEntry): Promise<void> {
   const stored = entry.stored
-  if (!stored) return undefined
-  if (!isExpired(stored) || !stored.refreshToken) return stored.accessToken
+  if (!stored?.refreshToken) throw new Error(`${entry.definition.id}: no refresh token stored`)
   const fresh = await refreshAccessToken({
     tokenEndpoint: stored.tokenEndpoint,
     clientId: stored.clientId,
@@ -64,12 +110,17 @@ async function ensureFreshToken(entry: ServerEntry): Promise<string | undefined>
   const file = readTokenFile() ?? { version: 1 as const, servers: {} }
   file.servers[entry.definition.id] = entry.stored
   writeTokenFile(file.servers)
-  await entry.connection?.close().catch(() => undefined)
-  entry.connection = await connectServer(entry.definition, {
-    apiToken: entry.stored.accessToken,
-    timeoutMs: 30_000,
-  })
-  return entry.stored.accessToken
+  await reconnect(entry)
+}
+
+/** Refresh an OAuth token that is expired (or nearly so), persisting the result. Static tokens skip refresh. */
+async function ensureFreshToken(entry: ServerEntry): Promise<string | undefined> {
+  if (entry.staticToken) return entry.staticToken
+  const stored = entry.stored
+  if (!stored) return undefined
+  if (!isExpired(stored) || !stored.refreshToken) return stored.accessToken
+  await refreshNow(entry)
+  return entry.stored?.accessToken
 }
 
 /**
@@ -90,21 +141,23 @@ export default function piCloudflareExtension(pi: PiHost): void {
       await entry.connection?.close().catch(() => undefined)
     }
     entries = []
-    const config = resolveConfig(loadUserConfig())
+    const userConfig = loadUserConfig() ?? {}
+    const config = resolveConfig(userConfig)
     const file = readTokenFile()
     const definitions = CLOUDFLARE_SERVERS.filter((server) =>
       config.enabledServerIds.includes(server.id)
     )
     for (const definition of definitions) {
-      const entry: ServerEntry = { definition }
+      const entry: ServerEntry = {
+        definition,
+        timeoutMs: config.connectTimeoutMs,
+        staticToken: definition.id === 'api' ? userConfig.apiToken : undefined,
+      }
       try {
         entry.stored = file?.servers[definition.id]
         await ensureFreshToken(entry)
-        entry.connection = await connectServer(definition, {
-          apiToken: entry.stored?.accessToken,
-          timeoutMs: config.connectTimeoutMs,
-        })
-        const tools = await entry.connection.listTools()
+        await reconnect(entry)
+        const tools = (await entry.connection?.listTools()) ?? []
         const registrations: ToolRegistration[] = buildAllRegistrations([
           {
             prefix: definition.prefix,
@@ -120,15 +173,45 @@ export default function piCloudflareExtension(pi: PiHost): void {
             ...registration,
             execute: async (toolCallId, params, signal) => {
               await ensureFreshToken(entry)
-              return registration.execute(toolCallId, params, signal)
+              try {
+                return await registration.execute(toolCallId, params, signal)
+              } catch (error) {
+                // Clock-fresh but server-rejected: one forced refresh plus
+                // reconnect and retry before giving the agent a dead end.
+                if (!isAuthFailure(error) || entry.staticToken || !entry.stored?.refreshToken) {
+                  throw error
+                }
+                try {
+                  await refreshNow(entry)
+                  return await registration.execute(toolCallId, params, signal)
+                } catch {
+                  const detail = error instanceof Error ? error.message : String(error)
+                  throw new Error(
+                    `${definition.id}: request rejected (${detail}). ${reauthHint(definition.id)}`
+                  )
+                }
+              }
             },
           })
         }
         entries.push(entry)
       } catch (error) {
         warn(
-          `${definition.id}: unavailable (${error instanceof Error ? error.message : String(error)}). Re-run pi-cloudflare-setup --oauth to re-authenticate.`
+          `${definition.id}: unavailable (${error instanceof Error ? error.message : String(error)}).`
         )
+        if (isAuthFailure(error)) {
+          // Agents rarely see process logs: register a stub they will find.
+          pi.registerTool({
+            name: `${definition.prefix}reauthenticate`,
+            label: `${definition.prefix}reauthenticate`,
+            description: `${definition.id} is not authenticated. Call this tool for exact re-authentication instructions.`,
+            parameters: Type.Object({}),
+            execute: async () => ({
+              content: [{ type: 'text', text: reauthHint(definition.id) }],
+            }),
+          })
+          warn(reauthHint(definition.id))
+        }
         await entry.connection?.close().catch(() => undefined)
       }
     }

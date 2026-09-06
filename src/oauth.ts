@@ -113,6 +113,7 @@ export function buildAuthorizeUrl(options: {
   state: string
   challenge: string
   resource: string
+  scope?: string
 }): string {
   const params = new URLSearchParams({
     response_type: 'code',
@@ -123,6 +124,7 @@ export function buildAuthorizeUrl(options: {
     state: options.state,
     resource: options.resource,
   })
+  if (options.scope) params.set('scope', options.scope)
   return `${options.authorizationEndpoint}?${params.toString()}`
 }
 

@@ -9,6 +9,9 @@
  *   pi-cloudflare-setup                  # authorize missing/expired servers
  *   pi-cloudflare-setup --only builds    # re-auth specific servers
  *   pi-cloudflare-setup --only api,observability
+ *   pi-cloudflare-setup --scope offline_access  # request extra OAuth scope
+ *
+ * OAUTH_SCOPE env works like --scope.
  *
  * Nothing secret is ever logged or written anywhere else.
  */
@@ -40,6 +43,7 @@ function parseOnly() {
 }
 
 const only = parseOnly()
+const scope = argValue('--scope') ?? process.env.OAUTH_SCOPE ?? undefined
 const wanted = only ?? AUTHED_IDS
 const file = readTokenFile() ?? { version: 1, servers: {} }
 const { fresh, needed } = partitionServers(wanted, file.servers)
@@ -60,7 +64,7 @@ if (needed.length === 0) {
     const definition = CLOUDFLARE_SERVERS.find((server) => server.id === id)
     console.log(`[${index}/${needed.length}] Approving ${id} (${definition.url})...`)
     try {
-      const { tokens, clientId, tokenEndpoint } = await runOAuthFlow(definition)
+      const { tokens, clientId, tokenEndpoint } = await runOAuthFlow(definition, { scope })
       file.servers[id] = { ...tokens, clientId, tokenEndpoint }
       writeTokenFile(file.servers)
       console.log(`[${index}/${needed.length}] ${id}: authorized and stored\n`)

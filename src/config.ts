@@ -6,6 +6,19 @@ export interface PiCloudflareConfig {
   servers?: Partial<Record<CloudflareServerId, boolean>>
   /** Connection timeout per server in milliseconds. */
   connectTimeoutMs?: number
+  /**
+   * Static bearer token for the `api` server (e.g. a Cloudflare API token
+   * from ${CLOUDFLARE_API_TOKEN}). Never expires, never needs browser
+   * OAuth, and takes precedence over stored OAuth tokens for that server.
+   * Other servers always use browser OAuth.
+   */
+  apiToken?: string
+  /**
+   * Extra OAuth scope requested at authorize time (e.g. `offline_access`)
+   * when the issuer honors it for longer-lived refresh tokens. Unset by
+   * default; unknown scopes are left for the issuer to ignore or reject.
+   */
+  oauthScope?: string
 }
 
 export interface ResolvedPiCloudflareConfig {

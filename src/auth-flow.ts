@@ -72,7 +72,7 @@ function openBrowser(url: string): void {
  */
 export async function runOAuthFlow(
   definition: CloudflareServerDefinition,
-  options: { timeoutMs?: number } = {}
+  options: { timeoutMs?: number; scope?: string } = {}
 ): Promise<OAuthFlowResult> {
   const metadata = await discoverAuthServer(definition.url)
   if (!metadata.registrationEndpoint) {
@@ -101,6 +101,7 @@ export async function runOAuthFlow(
         state,
         challenge,
         resource: definition.url,
+        scope: options.scope,
       })
     )
     const code = await waitForCallback(server, state, options.timeoutMs ?? 5 * 60_000)
