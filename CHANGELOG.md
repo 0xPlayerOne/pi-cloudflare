@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.3.0...pi-cloudflare-v0.3.1) (2026-09-06)
+
+
+### Bug Fixes
+
+* **auth:** drop unproven offline_access scope support ([3ce0210](https://github.com/0xPlayerOne/pi-cloudflare/commit/3ce0210fc6c8020e3ba0b4a2d33ffddb6bec2ee2))
+
 ## [0.3.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.2.4...pi-cloudflare-v0.3.0) (2026-09-06)
 
 
