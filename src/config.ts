@@ -13,12 +13,6 @@ export interface PiCloudflareConfig {
    * Other servers always use browser OAuth.
    */
   apiToken?: string
-  /**
-   * Extra OAuth scope requested at authorize time (e.g. `offline_access`)
-   * when the issuer honors it for longer-lived refresh tokens. Unset by
-   * default; unknown scopes are left for the issuer to ignore or reject.
-   */
-  oauthScope?: string
 }
 
 export interface ResolvedPiCloudflareConfig {

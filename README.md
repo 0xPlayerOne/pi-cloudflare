@@ -91,15 +91,10 @@ Two levers for longer-lived credentials:
    Create one at dash.cloudflare.com → Manage Account → API Tokens with
    the scopes your agents need. Other servers stay on browser OAuth.
 
-2. **Request a longer refresh grant.** Some issuers honor
-   `offline_access` for extended refresh lifetimes:
-
-   ```jsonc
-   { "pi-cloudflare": { "oauthScope": "offline_access" } }
-   ```
-
-   Or per re-auth: `pi-cloudflare-setup --only api --scope offline_access`.
-   If an issuer rejects the scope, drop it — support varies.
+2. **Re-authenticate surgically.** Browser OAuth is the fallback for the
+   other four servers. Tested 2026-09-06: the issuers ignore `offline_access`
+   (a scoped approval returned the standard 1-hour access token), so there is
+   no scope knob — refresh behavior is set server-side.
 
 Avoid re-running full setup on a schedule: each fresh approval can rotate
 away tokens other sessions still hold. Re-authenticate single servers with
