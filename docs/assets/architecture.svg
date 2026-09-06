@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="340" viewBox="0 0 760 340" font-family="ui-monospace, Menlo, Consolas, monospace">
+  <defs>
+    <style>
+      .box { fill: #1e1e24; stroke: #505050; rx: 8; }
+      .accent { stroke: #8abeb7; }
+      .title { fill: #f0c674; font-size: 13px; font-weight: bold; }
+      .label { fill: #d4d4d4; font-size: 12px; }
+      .dim { fill: #808080; font-size: 11px; }
+      .arrow { stroke: #5f87ff; stroke-width: 1.5; fill: none; marker-end: url(#head); }
+    </style>
+    <marker id="head" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8" fill="none" stroke="#5f87ff" stroke-width="1.5"/>
+    </marker>
+  </defs>
+  <rect x="270" y="16" width="220" height="64" rx="8" class="box accent"/>
+  <text x="380" y="42" text-anchor="middle" class="title">Pi agent + pi-cloudflare</text>
+  <text x="380" y="60" text-anchor="middle" class="dim">cf_* tools · 12 skills · setup helper</text>
+  <line x1="380" y1="80" x2="380" y2="108" class="arrow"/>
+  <rect x="230" y="108" width="300" height="64" rx="8" class="box"/>
+  <text x="380" y="134" text-anchor="middle" class="title">Extension proxy</text>
+  <text x="380" y="152" text-anchor="middle" class="dim">per-server prefixes · skips down servers · refreshes OAuth</text>
+  <line x1="220" y1="172" x2="80" y2="210" class="arrow"/>
+  <line x1="300" y1="172" x2="230" y2="210" class="arrow"/>
+  <line x1="380" y1="172" x2="380" y2="210" class="arrow"/>
+  <line x1="460" y1="172" x2="530" y2="210" class="arrow"/>
+  <line x1="540" y1="172" x2="680" y2="210" class="arrow"/>
+  <g font-size="12">
+    <rect x="10" y="210" width="140" height="104" rx="8" class="box"/>
+    <text x="80" y="234" text-anchor="middle" class="label">cf_api_*</text>
+    <text x="80" y="252" text-anchor="middle" class="dim">2,500+ endpoints</text>
+    <text x="80" y="268" text-anchor="middle" class="dim">OAuth per server</text>
+    <text x="80" y="296" text-anchor="middle" class="dim">api MCP</text>
+    <rect x="160" y="210" width="140" height="104" rx="8" class="box"/>
+    <text x="230" y="234" text-anchor="middle" class="label">cf_docs_*</text>
+    <text x="230" y="252" text-anchor="middle" class="dim">dev docs search</text>
+    <text x="230" y="268" text-anchor="middle" class="dim">no auth needed</text>
+    <text x="230" y="296" text-anchor="middle" class="dim">docs MCP</text>
+    <rect x="310" y="210" width="140" height="104" rx="8" class="box"/>
+    <text x="380" y="234" text-anchor="middle" class="label">cf_bindings_*</text>
+    <text x="380" y="252" text-anchor="middle" class="dim">KV · R2 · D1</text>
+    <text x="380" y="268" text-anchor="middle" class="dim">Queues · Hyperdrive</text>
+    <text x="380" y="296" text-anchor="middle" class="dim">bindings MCP</text>
+    <rect x="460" y="210" width="140" height="104" rx="8" class="box"/>
+    <text x="530" y="234" text-anchor="middle" class="label">cf_builds_*</text>
+    <text x="530" y="252" text-anchor="middle" class="dim">Workers Builds</text>
+    <text x="530" y="268" text-anchor="middle" class="dim">deploy insights</text>
+    <text x="530" y="296" text-anchor="middle" class="dim">builds MCP</text>
+    <rect x="610" y="210" width="140" height="104" rx="8" class="box"/>
+    <text x="680" y="234" text-anchor="middle" class="label">cf_obs_*</text>
+    <text x="680" y="252" text-anchor="middle" class="dim">logs · metrics</text>
+    <text x="680" y="268" text-anchor="middle" class="dim">traces</text>
+    <text x="680" y="296" text-anchor="middle" class="dim">observability MCP</text>
+  </g>
+</svg>
