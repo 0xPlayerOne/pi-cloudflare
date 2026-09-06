@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.2.4...pi-cloudflare-v0.3.0) (2026-09-06)
+
+
+### Features
+
+* durable auth via static API token plus graceful re-auth recovery ([357109c](https://github.com/0xPlayerOne/pi-cloudflare/commit/357109cbac8c75fe006b71e55b72ee742ebce32b))
+* durable auth via static API token plus graceful re-auth recovery ([9b1da66](https://github.com/0xPlayerOne/pi-cloudflare/commit/9b1da6627b16204833d347b52f67f511432574c4))
+
 ## [0.2.4](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.2.3...pi-cloudflare-v0.2.4) (2026-09-06)
 
 
