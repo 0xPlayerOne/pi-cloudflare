@@ -90,6 +90,7 @@ Two levers for longer-lived credentials:
 
    Create one at dash.cloudflare.com → Manage Account → API Tokens with
    the scopes your agents need. Other servers stay on browser OAuth.
+
 2. **Request a longer refresh grant.** Some issuers honor
    `offline_access` for extended refresh lifetimes:
 
