@@ -19,7 +19,13 @@ There is no public roll endpoint (`POST /user/tokens/:id/roll` returns `7000 No 
 3. The secret modal (`Token rolled successfully` / `Copy your API token now`) holds the **only copy**. Capture `cfut_...` immediately.
 4. Click Done. Verify the token row still shows Active.
 5. Validate before handoff: `GET /user` (identity), one scoped read per newly relied-upon group (see cloudflare-api-token skill matrix). `GET /user/tokens/:id` confirming policies is safe (never returns the secret).
-6. Hand the secret over **once** (chat message, never a file in the repo), then destroy every local copy. Tell the user the previous secret is dead and where to rewire it (`CLOUDFLARE_API_TOKEN`, settings).
+6. **Store it for them — never hand off manual steps.** The user must not need to touch anything:
+   - Write `export CLOUDFLARE_API_TOKEN="<secret>"` to `~/.pi/cloudflare-api-token` (mode `0600`, no other content that matters).
+   - Ensure `~/.zshrc` sources it inside a marked idempotent block (`# >>> pi-managed: cloudflare-api-token >>>` … `# <<< pi-managed: cloudflare-api-token <<<`), replacing any previous block.
+   - Set `~/.pi/agent/settings.json` → `pi-cloudflare.apiToken` to the literal string `${CLOUDFLARE_API_TOKEN}` (reference, never the secret). Preserve every other key byte-for-byte in meaning.
+   - Verify: fresh interactive shell resolves a 53-char value; settings parses; one live API read succeeds.
+   - Tell the user to open a new terminal (or `source ~/.zshrc`) and restart Pi sessions so the new environment is picked up.
+7. Destroy temp copies. Report stored + verified **without printing the secret**.
 
 ## What success looks like
 
