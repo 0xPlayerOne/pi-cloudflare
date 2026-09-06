@@ -58,3 +58,13 @@ CLOUDFLARE_API_TOKEN=<paste-once> node scripts/verify-api-token.mjs
 Checks identity (`/user`), token status, and a Workers scripts read. Re-run
 any time agents report auth trouble — it distinguishes a dead token from a
 scoping gap in seconds.
+
+## 6. Builder tips (learned the hard way)
+
+- Every permission row has three dropdowns; an unset level leaves the row
+  invalid and blocks the whole builder. Complete scope → permission → level
+  per row and verify each commit before moving on. See
+  `skills/cloudflare-api-token/SKILL.md` for the full standardized flow.
+- The token secret is shown exactly once at creation and never returned by
+  later reads. Capture it from the creation response; if missed, delete the
+  token and recreate rather than hunting for it.
