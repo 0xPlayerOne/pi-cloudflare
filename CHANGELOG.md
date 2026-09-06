@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.2.1...pi-cloudflare-v0.2.2) (2026-09-06)
+
+
+### Documentation
+
+* architecture diagram and troubleshooting ([f504a88](https://github.com/0xPlayerOne/pi-cloudflare/commit/f504a88280ce1090dc354666b195dd6776de8f4e))
+
 ## [0.2.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.2.0...pi-cloudflare-v0.2.1) (2026-09-06)
 
 
