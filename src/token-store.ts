@@ -1,4 +1,4 @@
-import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
@@ -32,17 +32,23 @@ export function readTokenFile(home = homedir()): TokenFile | undefined {
   }
 }
 
-/** Persist per-server tokens with owner-only permissions. Never logs values. */
+/**
+ * Persist per-server tokens with owner-only permissions. Never logs values.
+ * Writes atomically (temp file plus rename) so concurrent Pi sessions
+ * cannot interleave partial writes into a corrupt token file.
+ */
 export function writeTokenFile(
   servers: Partial<Record<CloudflareServerId, StoredServerTokens>>,
   home = homedir()
 ): void {
   const path = tokenFilePath(home)
   mkdirSync(join(home, '.pi'), { recursive: true })
-  writeFileSync(path, JSON.stringify({ version: 1, servers }, null, 2) + '\n', {
+  const tmp = `${path}.${process.pid}.tmp`
+  writeFileSync(tmp, JSON.stringify({ version: 1, servers }, null, 2) + '\n', {
     mode: 0o600,
   })
-  chmodSync(path, 0o600)
+  chmodSync(tmp, 0o600)
+  renameSync(tmp, path)
 }
 
 export function isExpired(tokens: Pick<OAuthTokens, 'expiresAt'>, skewMs = 30_000): boolean {

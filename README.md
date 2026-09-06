@@ -89,7 +89,8 @@ Two levers for longer-lived credentials:
    ```
 
    Create one at dash.cloudflare.com → Manage Account → API Tokens with
-   the scopes your agents need. Other servers stay on browser OAuth.
+   the scopes your agents need (exact template, additions, and account
+   scoping in `docs/api-token.md`). Other servers stay on browser OAuth.
 
 2. **Re-authenticate surgically.** Browser OAuth is the fallback for the
    other four servers. Tested 2026-09-06: the issuers ignore `offline_access`

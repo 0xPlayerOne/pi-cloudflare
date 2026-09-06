@@ -38,14 +38,18 @@ interface ServerEntry {
   /** Static bearer token (api server only): never expires, never refreshes. */
   staticToken?: string
   timeoutMs: number
+  /** Access token the live connection was built with; drift triggers reconnect. */
+  connectedToken?: string
 }
 
 async function reconnect(entry: ServerEntry): Promise<void> {
   await entry.connection?.close().catch(() => undefined)
+  const token = entry.staticToken ?? entry.stored?.accessToken
   entry.connection = await connectServer(entry.definition, {
-    apiToken: entry.staticToken ?? entry.stored?.accessToken,
+    apiToken: token,
     timeoutMs: entry.timeoutMs,
   })
+  entry.connectedToken = token
 }
 
 function expandEnvVars(value: unknown): unknown {
@@ -97,8 +101,21 @@ export function isAuthFailure(error: unknown): boolean {
   )
 }
 
+/**
+ * Adopt rotations performed by sibling sessions: parallel Pi processes
+ * share one token file, and refresh grants are single-use. If the file
+ * holds a different grant than memory, the file wins without network I/O.
+ */
+export function syncFromFile(entry: ServerEntry, home?: string): void {
+  const latest = readTokenFile(home)?.servers[entry.definition.id]
+  if (latest && latest.refreshToken !== entry.stored?.refreshToken) {
+    entry.stored = latest
+  }
+}
+
 /** Refresh unconditionally (caller decided the token is rejected). Persists and reconnects. */
 async function refreshNow(entry: ServerEntry): Promise<void> {
+  syncFromFile(entry)
   const stored = entry.stored
   if (!stored?.refreshToken) throw new Error(`${entry.definition.id}: no refresh token stored`)
   const fresh = await refreshAccessToken({
@@ -116,9 +133,15 @@ async function refreshNow(entry: ServerEntry): Promise<void> {
 /** Refresh an OAuth token that is expired (or nearly so), persisting the result. Static tokens skip refresh. */
 async function ensureFreshToken(entry: ServerEntry): Promise<string | undefined> {
   if (entry.staticToken) return entry.staticToken
+  syncFromFile(entry)
   const stored = entry.stored
   if (!stored) return undefined
-  if (!isExpired(stored) || !stored.refreshToken) return stored.accessToken
+  if (!isExpired(stored) || !stored.refreshToken) {
+    if (!entry.connection || entry.connectedToken !== stored.accessToken) {
+      await reconnect(entry)
+    }
+    return stored.accessToken
+  }
   await refreshNow(entry)
   return entry.stored?.accessToken
 }
@@ -156,7 +179,7 @@ export default function piCloudflareExtension(pi: PiHost): void {
       try {
         entry.stored = file?.servers[definition.id]
         await ensureFreshToken(entry)
-        await reconnect(entry)
+        if (!entry.connection) await reconnect(entry)
         const tools = (await entry.connection?.listTools()) ?? []
         const registrations: ToolRegistration[] = buildAllRegistrations([
           {
