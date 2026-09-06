@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.3.1...pi-cloudflare-v0.4.0) (2026-09-06)
+
+
+### Features
+
+* api-token lifecycle skills (create, roll, scopes) + validation findings ([#12](https://github.com/0xPlayerOne/pi-cloudflare/issues/12)) ([2c7b241](https://github.com/0xPlayerOne/pi-cloudflare/commit/2c7b24150777dcea667184bd6b5f26d1d069b0f0))
+* exact API token recipe with verifier script ([9b5bd9e](https://github.com/0xPlayerOne/pi-cloudflare/commit/9b5bd9e9b7c5017f1d5c7ac2beb002eb9249a036))
+
+
+### Documentation
+
+* wrangler CLI vs MCP routing table ([8101016](https://github.com/0xPlayerOne/pi-cloudflare/commit/8101016b1db9d07639f1a0dea9a697b34e30caed))
+
 ## [0.3.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.3.0...pi-cloudflare-v0.3.1) (2026-09-06)
 
 
