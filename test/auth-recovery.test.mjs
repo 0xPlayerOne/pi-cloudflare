@@ -61,7 +61,11 @@ describe('syncFromFile', () => {
 
   it('adopts a rotated grant from a sibling session', () => {
     const home = setupFile({ api: grant('access-new', 'refresh-new') })
-    const entry = { definition: { id: 'api' }, timeoutMs: 1, stored: grant('access-old', 'refresh-old') }
+    const entry = {
+      definition: { id: 'api' },
+      timeoutMs: 1,
+      stored: grant('access-old', 'refresh-old'),
+    }
     syncFromFile(entry, home)
     assert.equal(entry.stored.accessToken, 'access-new')
     assert.equal(entry.stored.refreshToken, 'refresh-new')
