@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.0...pi-cloudflare-v0.5.1) (2026-09-07)
+
+
+### Maintenance
+
+* adopt code-foundry v1.3.1 baseline and migrate to oxlint/oxfmt ([#19](https://github.com/0xPlayerOne/pi-cloudflare/issues/19)) ([af03771](https://github.com/0xPlayerOne/pi-cloudflare/commit/af03771cea472e2314cbff3e9a35dbbe922915f3))
+
 ## [0.5.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.4.1...pi-cloudflare-v0.5.0) (2026-09-07)
 
 
