@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.4.1...pi-cloudflare-v0.5.0) (2026-09-07)
+
+
+### Features
+
+* migrate formatting and linting from Prettier/ESLint to oxfmt/oxlint ([#17](https://github.com/0xPlayerOne/pi-cloudflare/issues/17)) ([751c9a5](https://github.com/0xPlayerOne/pi-cloudflare/commit/751c9a57a2cd1f96c82fc9af2c6b58f47c997803))
+
 ## [0.4.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.4.0...pi-cloudflare-v0.4.1) (2026-09-06)
 
 
