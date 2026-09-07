@@ -22,12 +22,18 @@ from the **Edit Cloudflare Workers** template, which already includes:
 
 In the same builder, add these permission groups:
 
-| Group                    | Why                                  |
-| ------------------------ | ------------------------------------ |
-| Workers D1 Storage Write | `d1_*` tools (databases, query)      |
-| Hyperdrive Write         | `hyperdrive_*` tools (configs)       |
-| Account Analytics Read   | `query_worker_observability` rollups |
-| Logs Read                | log queries                          |
+| Group                              | Why                                  |
+| ---------------------------------- | ------------------------------------ |
+| Workers D1 Storage Write           | `d1_*` tools (databases, query)      |
+| Hyperdrive Write                   | `hyperdrive_*` tools (configs)       |
+| Account Analytics Read             | `query_worker_observability` rollups |
+| Logs Read                          | log queries                          |
+| Workers Builds Configuration Write | `workers_builds_*` tools             |
+
+Workers Builds needs the Edit level, not just Read: listing builds and
+reading logs work with Read, but repairing a trigger (PATCH) or removing a
+stale build token (DELETE) requires Write — verified 2026-09-07 when two
+preview triggers pointed at a rolled token.
 
 Skip Zone/DNS, Queues, and AI Gateway unless agents start managing them —
 403s name the missing group, and the extension surfaces them verbatim.

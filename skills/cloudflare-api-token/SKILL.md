@@ -59,5 +59,6 @@ Same-origin `/api/v4/*` in page context carries the session:
 - Run `CLOUDFLARE_API_TOKEN=<paste-once> node scripts/verify-api-token.mjs` (identity, token status, Workers scripts read).
 - Then one live read per relied-upon group, all passing on the reference token: `GET /user`, `GET /accounts`, Workers scripts list, KV namespaces list, R2 buckets list, D1 databases list, Hyperdrive configs list, zones list, zone routes list, account read, memberships list, audit-logs list (proves Logs Read).
 - Known non-gaps, do not chase: `GET /user/tokens/:id` returns `9109` by design (tokens cannot manage tokens); zone-analytics `10000` without the Zone Analytics group is correct least privilege (observability rollups go through the separate obs MCP, not this token); Workers Tail needs a websocket (group presence + dashboard UI is the check).
+- Workers Builds (live-proven 2026-09-07): `GET /accounts/{id}/builds/builds/{uuid}` plus `/logs` read; trigger PATCH and build-token DELETE verified with the Edit level.
 - Template drift is real: the dashboard template grows over time (Builds/Agents/Containers/Observability/Pages appeared after the doc was written). Enumerate required groups per task from `docs/api-token.md`; never assume the template equals the need.
 - A 403 naming a missing group later means extend-then-verify, not a new token: same flow, one more row.
