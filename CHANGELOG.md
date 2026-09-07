@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.2](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.1...pi-cloudflare-v0.5.2) (2026-09-07)
+
+
+### Bug Fixes
+
+* **ci:** pin generated callers to the adopted v1.4.1 runtime ([#25](https://github.com/0xPlayerOne/pi-cloudflare/issues/25)) ([2da66bf](https://github.com/0xPlayerOne/pi-cloudflare/commit/2da66bf462e9209e1fffecc8a6b14b0578c00716))
+
+
+### Maintenance
+
+* **code-foundry:** upgrade to v1.4.1 ([#22](https://github.com/0xPlayerOne/pi-cloudflare/issues/22)) ([8c8e1a4](https://github.com/0xPlayerOne/pi-cloudflare/commit/8c8e1a43529a3346d00554ca976b1c5d05fc20d3))
+
 ## [0.5.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.0...pi-cloudflare-v0.5.1) (2026-09-07)
 
 
