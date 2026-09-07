@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.5.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.0...pi-cloudflare-v0.5.1) (2026-09-07)
+
+
+### Maintenance
+
+* adopt code-foundry v1.3.1 baseline and migrate to oxlint/oxfmt ([#19](https://github.com/0xPlayerOne/pi-cloudflare/issues/19)) ([af03771](https://github.com/0xPlayerOne/pi-cloudflare/commit/af03771cea472e2314cbff3e9a35dbbe922915f3))
+
+## [0.5.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.4.1...pi-cloudflare-v0.5.0) (2026-09-07)
+
+
+### Features
+
+* migrate formatting and linting from Prettier/ESLint to oxfmt/oxlint ([#17](https://github.com/0xPlayerOne/pi-cloudflare/issues/17)) ([751c9a5](https://github.com/0xPlayerOne/pi-cloudflare/commit/751c9a57a2cd1f96c82fc9af2c6b58f47c997803))
+
+## [0.4.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.4.0...pi-cloudflare-v0.4.1) (2026-09-06)
+
+
+### Maintenance
+
+* adopt code-foundry v1.1.1 baseline ([#14](https://github.com/0xPlayerOne/pi-cloudflare/issues/14)) ([84297b0](https://github.com/0xPlayerOne/pi-cloudflare/commit/84297b00fe4dec0769a5d0f694d7c209a3c69a50))
+
 ## [0.4.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.3.1...pi-cloudflare-v0.4.0) (2026-09-06)
 
 

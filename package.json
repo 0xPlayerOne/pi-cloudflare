@@ -1,26 +1,31 @@
 {
   "name": "pi-cloudflare",
-  "version": "0.4.0",
+  "version": "0.5.1",
   "description": "Pi extension proxying Cloudflare's official MCP servers (API, docs, bindings, builds, observability) with cf_ prefixed tools.",
   "keywords": [
-    "pi-package",
-    "pi",
-    "extension",
     "cloudflare",
-    "mcp"
+    "extension",
+    "mcp",
+    "pi",
+    "pi-package"
   ],
+  "homepage": "https://github.com/0xPlayerOne/pi-cloudflare#readme",
+  "bugs": "https://github.com/0xPlayerOne/pi-cloudflare/issues",
   "license": "MIT",
   "author": "0xPlayerOne",
   "repository": {
     "type": "git",
     "url": "https://github.com/0xPlayerOne/pi-cloudflare.git"
   },
-  "homepage": "https://github.com/0xPlayerOne/pi-cloudflare#readme",
-  "bugs": "https://github.com/0xPlayerOne/pi-cloudflare/issues",
-  "type": "module",
-  "engines": {
-    "node": "^20.19.0 || ^22.12.0 || >=23"
+  "bin": {
+    "pi-cloudflare-setup": "./bin/setup.mjs"
   },
+  "files": [
+    "dist",
+    "skills",
+    "README.md"
+  ],
+  "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -33,25 +38,11 @@
       "default": "./package.json"
     }
   },
-  "files": [
-    "dist",
-    "skills",
-    "README.md"
-  ],
-  "pi": {
-    "extensions": [
-      "./dist/index.js"
-    ],
-    "skills": [
-      "./skills"
-    ]
-  },
-  "bin": {
-    "pi-cloudflare-setup": "./bin/setup.mjs"
-  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "format:check": "prettier --check .",
+    "format:check": "oxfmt --check .",
+    "fmt": "oxfmt .",
+    "lint": "oxlint",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "prepublishOnly": "npm run build",
     "test": "node --test test/config.test.mjs test/servers.test.mjs test/proxy.test.mjs test/oauth.test.mjs test/token-store.test.mjs test/auth-recovery.test.mjs",
@@ -63,7 +54,19 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "prettier": "^3.9.6",
+    "oxfmt": "^0.66.0",
+    "oxlint": "^1.81.0",
     "typescript": "^5.9.0"
+  },
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || >=23"
+  },
+  "pi": {
+    "extensions": [
+      "./dist/index.js"
+    ],
+    "skills": [
+      "./skills"
+    ]
   }
 }
