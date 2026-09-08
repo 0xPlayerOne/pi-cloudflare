@@ -1,8 +1,10 @@
 {
   "name": "pi-cloudflare",
   "version": "0.5.5",
-  "description": "Pi extension proxying Cloudflare's official MCP servers (API, docs, bindings, builds, observability) with cf_ prefixed tools.",
+  "description": "Cloudflare Agent Plugin and native Pi extension providing official skills and cf_-prefixed MCP tools.",
   "keywords": [
+    "agent-plugin",
+    "agent-skills",
     "cloudflare",
     "extension",
     "mcp",
@@ -23,6 +25,8 @@
   "files": [
     "dist",
     "skills",
+    "plugin.json",
+    "mcp.json",
     "README.md"
   ],
   "type": "module",
@@ -47,7 +51,7 @@
     "perf:check": "node scripts/performance-audit.mjs --check",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "prepublishOnly": "npm run build",
-    "test": "node --test test/config.test.mjs test/servers.test.mjs test/proxy.test.mjs test/oauth.test.mjs test/token-store.test.mjs test/auth-recovery.test.mjs",
+    "test": "node --test test/config.test.mjs test/servers.test.mjs test/proxy.test.mjs test/oauth.test.mjs test/token-store.test.mjs test/auth-recovery.test.mjs test/plugin.test.mjs",
     "pretest": "npm run build"
   },
   "dependencies": {

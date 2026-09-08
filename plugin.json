@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "pi-cloudflare",
+  "version": "0.5.5",
+  "description": "Cloudflare skills and cf_-prefixed MCP tools, with a native Pi adapter and an Agent Plugins 1.0 portable runtime.",
+  "author": {
+    "name": "0xPlayerOne",
+    "url": "https://github.com/0xPlayerOne"
+  },
+  "homepage": "https://github.com/0xPlayerOne/pi-cloudflare#readme",
+  "repository": "https://github.com/0xPlayerOne/pi-cloudflare",
+  "license": "MIT",
+  "keywords": [
+    "cloudflare",
+    "agent-plugin",
+    "mcp",
+    "agent-skills",
+    "pi"
+  ]
+}

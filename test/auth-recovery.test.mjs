@@ -39,6 +39,17 @@ describe('reauthHint', () => {
     assert.doesNotMatch(hint, /--oauth/)
   })
 
+  it('uses plugin-local setup and data paths for portable hosts', () => {
+    const hint = reauthHint('builds', {
+      tokenFile: '/tmp/plugin data/cloudflare-tokens.json',
+      setupScript: '/tmp/plugin root/bin/setup.mjs',
+    })
+    assert.match(hint, /node "\/tmp\/plugin root\/bin\/setup\.mjs"/)
+    assert.match(hint, /--token-file "\/tmp\/plugin data\/cloudflare-tokens\.json"/)
+    assert.match(hint, /--only builds/)
+    assert.doesNotMatch(hint, /npx -p pi-cloudflare/)
+  })
+
   it('offers the persistent API-token alternative with its skill', () => {
     const hint = reauthHint('api')
     assert.match(hint, /API token/)
