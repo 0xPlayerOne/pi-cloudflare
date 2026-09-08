@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.5](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.4...pi-cloudflare-v0.5.5) (2026-09-08)
+
+
+### Maintenance
+
+* **ci:** upgrade Code Foundry to v1.9.11 ([#31](https://github.com/0xPlayerOne/pi-cloudflare/issues/31)) ([e8f9852](https://github.com/0xPlayerOne/pi-cloudflare/commit/e8f98525305616f204471d4fd547151c754be9c4))
+
 ## [0.5.4](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.3...pi-cloudflare-v0.5.4) (2026-09-08)
 
 
