@@ -2,8 +2,7 @@ import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 
-const readJson = (path) =>
-  JSON.parse(readFileSync(new URL(`../${path}`, import.meta.url), 'utf8'))
+const readJson = (path) => JSON.parse(readFileSync(new URL(`../${path}`, import.meta.url), 'utf8'))
 
 describe('Agent Plugins 1.0 package', () => {
   it('ships a version-synchronized plugin manifest', () => {
