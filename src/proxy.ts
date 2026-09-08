@@ -14,7 +14,7 @@ export interface ToolRegistration {
   execute: (
     toolCallId: string,
     params: Record<string, unknown>,
-    signal: AbortSignal | undefined
+    signal?: AbortSignal
   ) => Promise<CallToolResult>
 }
 
