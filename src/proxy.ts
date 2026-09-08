@@ -29,11 +29,11 @@ function toToolContent(result: unknown): CallToolResult {
     return { content: [{ type: 'text', text: String(result) }] }
   }
   const record = result as { content?: unknown; isError?: unknown }
-  const content = Array.isArray(record.content)
-    ? (record.content as CallToolResult['content'])
-    : []
+  const content = Array.isArray(record.content) ? (record.content as CallToolResult['content']) : []
   const output =
-    content.length > 0 ? content : ([{ type: 'text', text: '' }] as CallToolResult['content'])
+    content.length > 0
+      ? content
+      : ([{ type: 'text', text: '' }] as CallToolResult['content'])
   return typeof record.isError === 'boolean' && record.isError
     ? { content: output, isError: true }
     : { content: output }
