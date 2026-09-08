@@ -10,11 +10,5 @@
   "homepage": "https://github.com/0xPlayerOne/pi-cloudflare#readme",
   "repository": "https://github.com/0xPlayerOne/pi-cloudflare",
   "license": "MIT",
-  "keywords": [
-    "cloudflare",
-    "agent-plugin",
-    "mcp",
-    "agent-skills",
-    "pi"
-  ]
+  "keywords": ["cloudflare", "agent-plugin", "mcp", "agent-skills", "pi"]
 }
