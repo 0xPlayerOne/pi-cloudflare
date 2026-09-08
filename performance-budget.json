@@ -1,0 +1,10 @@
+{
+  "buildMs": 15000,
+  "coldStartP95Ms": 750,
+  "proxyRequestP95Ms": 1,
+  "distBytes": 180000,
+  "packedBytes": 750000,
+  "unpackedBytes": 2200000,
+  "productionDependencies": 110,
+  "packageEntries": 450
+}
