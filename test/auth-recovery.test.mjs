@@ -6,6 +6,26 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { isAuthFailure, reauthHint, syncFromFile } from '../dist/index.js'
 
+function setupFile(servers) {
+  const home = mkdtempSync(join(tmpdir(), 'pi-cf-sync-'))
+  mkdirSync(join(home, '.pi'), { recursive: true })
+  writeFileSync(
+    join(home, '.pi', 'cloudflare-tokens.json'),
+    JSON.stringify({ version: 1, servers })
+  )
+  return home
+}
+
+function grant(access, refresh) {
+  return {
+    accessToken: access,
+    refreshToken: refresh,
+    expiresAt: Date.now() + 3600000,
+    clientId: 'client',
+    tokenEndpoint: 'https://example.test/token',
+  }
+}
+
 describe('isAuthFailure', () => {
   it('flags credential rejections', () => {
     for (const message of [
@@ -39,6 +59,17 @@ describe('reauthHint', () => {
     assert.doesNotMatch(hint, /--oauth/)
   })
 
+  it('uses plugin-local setup and data paths for portable hosts', () => {
+    const hint = reauthHint('builds', {
+      tokenFile: '/tmp/plugin data/cloudflare-tokens.json',
+      setupScript: '/tmp/plugin root/bin/setup.mjs',
+    })
+    assert.match(hint, /node "\/tmp\/plugin root\/bin\/setup\.mjs"/)
+    assert.match(hint, /--token-file "\/tmp\/plugin data\/cloudflare-tokens\.json"/)
+    assert.match(hint, /--only builds/)
+    assert.doesNotMatch(hint, /npx -p pi-cloudflare/)
+  })
+
   it('offers the persistent API-token alternative with its skill', () => {
     const hint = reauthHint('api')
     assert.match(hint, /API token/)
@@ -47,24 +78,6 @@ describe('reauthHint', () => {
 })
 
 describe('syncFromFile', () => {
-  function setupFile(servers) {
-    const home = mkdtempSync(join(tmpdir(), 'pi-cf-sync-'))
-    mkdirSync(join(home, '.pi'), { recursive: true })
-    writeFileSync(
-      join(home, '.pi', 'cloudflare-tokens.json'),
-      JSON.stringify({ version: 1, servers })
-    )
-    return home
-  }
-
-  const grant = (access, refresh) => ({
-    accessToken: access,
-    refreshToken: refresh,
-    expiresAt: Date.now() + 3600000,
-    clientId: 'client',
-    tokenEndpoint: 'https://example.test/token',
-  })
-
   it('adopts a rotated grant from a sibling session', () => {
     const home = setupFile({ api: grant('access-new', 'refresh-new') })
     const entry = {

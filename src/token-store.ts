@@ -1,16 +1,16 @@
 import { chmodSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
-import type { CloudflareServerId } from './servers.js'
 import type { OAuthTokens } from './oauth.js'
+import type { CloudflareServerId } from './servers.js'
 
 export interface StoredServerTokens extends OAuthTokens {
   clientId: string
   tokenEndpoint: string
 }
 
-interface TokenFile {
+export interface TokenFile {
   version: 1
   servers: Partial<Record<CloudflareServerId, StoredServerTokens>>
 }
@@ -19,9 +19,8 @@ export function tokenFilePath(home = homedir()): string {
   return join(home, '.pi', 'cloudflare-tokens.json')
 }
 
-/** Read stored per-server OAuth tokens. Missing file means not authenticated. */
-export function readTokenFile(home = homedir()): TokenFile | undefined {
-  const path = tokenFilePath(home)
+/** Read stored per-server OAuth tokens from an explicit file path. */
+export function readTokenFileAt(path: string): TokenFile | undefined {
   if (!existsSync(path)) return undefined
   try {
     const parsed = JSON.parse(readFileSync(path, 'utf8')) as TokenFile
@@ -32,23 +31,37 @@ export function readTokenFile(home = homedir()): TokenFile | undefined {
   }
 }
 
+/** Read the legacy native-Pi token store. Missing file means not authenticated. */
+export function readTokenFile(home = homedir()): TokenFile | undefined {
+  return readTokenFileAt(tokenFilePath(home))
+}
+
 /**
- * Persist per-server tokens with owner-only permissions. Never logs values.
- * Writes atomically (temp file plus rename) so concurrent Pi sessions
- * cannot interleave partial writes into a corrupt token file.
+ * Persist per-server tokens at an explicit path with owner-only permissions.
+ * Writes atomically so concurrent agent sessions cannot leave a partial file.
  */
-export function writeTokenFile(
+export function writeTokenFileAt(
   servers: Partial<Record<CloudflareServerId, StoredServerTokens>>,
-  home = homedir()
+  path: string
 ): void {
-  const path = tokenFilePath(home)
-  mkdirSync(join(home, '.pi'), { recursive: true })
+  mkdirSync(dirname(path), { recursive: true })
   const tmp = `${path}.${process.pid}.tmp`
   writeFileSync(tmp, JSON.stringify({ version: 1, servers }, null, 2) + '\n', {
     mode: 0o600,
   })
   chmodSync(tmp, 0o600)
   renameSync(tmp, path)
+}
+
+/**
+ * Persist per-server tokens with owner-only permissions in native Pi's
+ * ~/.pi/cloudflare-tokens.json.
+ */
+export function writeTokenFile(
+  servers: Partial<Record<CloudflareServerId, StoredServerTokens>>,
+  home = homedir()
+): void {
+  writeTokenFileAt(servers, tokenFilePath(home))
 }
 
 export function isExpired(tokens: Pick<OAuthTokens, 'expiresAt'>, skewMs = 30_000): boolean {
