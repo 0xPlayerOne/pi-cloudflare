@@ -4,9 +4,7 @@
     "cloudflare": {
       "type": "stdio",
       "command": "node",
-      "args": [
-        "${PLUGIN_ROOT}/dist/mcp-server.js"
-      ],
+      "args": ["${PLUGIN_ROOT}/dist/mcp-server.js"],
       "env": {
         "PI_CLOUDFLARE_PLUGIN_ROOT": "${PLUGIN_ROOT}",
         "PI_CLOUDFLARE_TOKEN_FILE": "${PLUGIN_DATA}/cloudflare-tokens.json"
