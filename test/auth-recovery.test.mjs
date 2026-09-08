@@ -6,6 +6,26 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { isAuthFailure, reauthHint, syncFromFile } from '../dist/index.js'
 
+function setupFile(servers) {
+  const home = mkdtempSync(join(tmpdir(), 'pi-cf-sync-'))
+  mkdirSync(join(home, '.pi'), { recursive: true })
+  writeFileSync(
+    join(home, '.pi', 'cloudflare-tokens.json'),
+    JSON.stringify({ version: 1, servers })
+  )
+  return home
+}
+
+function grant(access, refresh) {
+  return {
+    accessToken: access,
+    refreshToken: refresh,
+    expiresAt: Date.now() + 3600000,
+    clientId: 'client',
+    tokenEndpoint: 'https://example.test/token',
+  }
+}
+
 describe('isAuthFailure', () => {
   it('flags credential rejections', () => {
     for (const message of [
@@ -58,24 +78,6 @@ describe('reauthHint', () => {
 })
 
 describe('syncFromFile', () => {
-  function setupFile(servers) {
-    const home = mkdtempSync(join(tmpdir(), 'pi-cf-sync-'))
-    mkdirSync(join(home, '.pi'), { recursive: true })
-    writeFileSync(
-      join(home, '.pi', 'cloudflare-tokens.json'),
-      JSON.stringify({ version: 1, servers })
-    )
-    return home
-  }
-
-  const grant = (access, refresh) => ({
-    accessToken: access,
-    refreshToken: refresh,
-    expiresAt: Date.now() + 3600000,
-    clientId: 'client',
-    tokenEndpoint: 'https://example.test/token',
-  })
-
   it('adopts a rotated grant from a sibling session', () => {
     const home = setupFile({ api: grant('access-new', 'refresh-new') })
     const entry = {
