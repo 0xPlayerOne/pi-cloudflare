@@ -71,13 +71,11 @@ async function main(): Promise<void> {
   server.setRequestHandler(ListToolsRequestSchema, async () => {
     const tools = await registrations()
     return {
-      tools: tools.map(
-        (tool): Tool => ({
-          name: tool.name,
-          description: tool.description,
-          inputSchema: tool.inputSchema as Tool['inputSchema'],
-        })
-      ),
+      tools: tools.map((tool): Tool => ({
+        name: tool.name,
+        description: tool.description,
+        inputSchema: tool.inputSchema as Tool['inputSchema'],
+      })),
     }
   })
 

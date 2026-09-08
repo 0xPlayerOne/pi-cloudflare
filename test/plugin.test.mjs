@@ -43,10 +43,7 @@ describe('Agent Plugins 1.0 package', () => {
     assert.deepEqual(server.args, ['${PLUGIN_ROOT}/dist/mcp-server.js'])
     assert.equal(server.cwd, '${PLUGIN_ROOT}')
     assert.equal(server.env.PI_CLOUDFLARE_PLUGIN_ROOT, '${PLUGIN_ROOT}')
-    assert.equal(
-      server.env.PI_CLOUDFLARE_TOKEN_FILE,
-      '${PLUGIN_DATA}/cloudflare-tokens.json'
-    )
+    assert.equal(server.env.PI_CLOUDFLARE_TOKEN_FILE, '${PLUGIN_DATA}/cloudflare-tokens.json')
   })
 
   it('includes Agent Plugin entrypoints in the npm tarball allowlist', () => {
