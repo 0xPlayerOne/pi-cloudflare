@@ -133,8 +133,12 @@ closed on scope). They complement; neither replaces the other.
 
 ```bash
 npm install
-npm test    # typecheck + unit tests (mocked, no network)
+npm test    # build + unit tests + performance gates (mocked, no network)
+npm run perf # build/startup/request/package performance report
 ```
+
+Performance budgets, measured surfaces, and the release validation path are documented in
+[`docs/performance.md`](docs/performance.md).
 
 ## License
 
