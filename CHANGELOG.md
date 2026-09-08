@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.4](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.3...pi-cloudflare-v0.5.4) (2026-09-08)
+
+
+### Tests
+
+* **perf:** add M0 regression audit ([#29](https://github.com/0xPlayerOne/pi-cloudflare/issues/29)) ([9ef68b6](https://github.com/0xPlayerOne/pi-cloudflare/commit/9ef68b675db4de21068e2d73796c5e8da17445d1))
+
 ## [0.5.3](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.2...pi-cloudflare-v0.5.3) (2026-09-08)
 
 
