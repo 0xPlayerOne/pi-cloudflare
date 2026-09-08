@@ -45,12 +45,13 @@ stable without publishing or contacting Cloudflare.
 
 ## Release path
 
-1. Run `npm test`. Its `pretest` hook builds the package, the unit suite verifies the existing API
-   and proxy behavior, and `perf:check` enforces the M0 budgets and artifact contract.
+1. Run `npm test`, then `npm run perf:check`. The test command's `pretest` hook builds the package,
+   the unit suite verifies the existing API and proxy behavior, and the performance command enforces
+   the M0 budgets and artifact contract.
 2. Run `npm run format:check`, `npm run lint`, and `npm run typecheck` locally.
 3. Open a pull request to `main`. The Code Foundry validation workflow repeats format, lint,
-   type-check, build, tests, security, and CodeQL checks; `Validation / Gate` is the stable aggregate
-   merge gate.
+   type-check, build, tests, performance, security, and CodeQL checks; `Validation / Gate` is the
+   stable aggregate merge gate.
 4. Squash-merge a normal feature pull request only after the aggregate gate passes. Release Please
    then prepares the version pull request, which rebases into `main` after its release-policy
    validation passes.

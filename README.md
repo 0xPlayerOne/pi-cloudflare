@@ -133,7 +133,8 @@ closed on scope). They complement; neither replaces the other.
 
 ```bash
 npm install
-npm test    # build + unit tests + performance gates (mocked, no network)
+npm test    # build + unit tests (mocked, no network)
+npm run perf:check # performance budgets enforced by Code Foundry's performance job
 npm run perf # build/startup/request/package performance report
 ```
 
