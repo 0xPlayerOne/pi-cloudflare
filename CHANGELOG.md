@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.5...pi-cloudflare-v0.6.0) (2026-09-08)
+
+
+### Features
+
+* add Agent Plugins 1.0 dual distribution ([#34](https://github.com/0xPlayerOne/pi-cloudflare/issues/34)) ([a4499b3](https://github.com/0xPlayerOne/pi-cloudflare/commit/a4499b3c9147678947eb63f7fd0448a475adda66))
+
+
+### Bug Fixes
+
+* **ci:** ignore release-managed plugin manifest formatting ([#36](https://github.com/0xPlayerOne/pi-cloudflare/issues/36)) ([f2bb1da](https://github.com/0xPlayerOne/pi-cloudflare/commit/f2bb1da3393d7c2d8a4cede625fc51a2edcfad4b))
+
 ## [0.5.5](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.4...pi-cloudflare-v0.5.5) (2026-09-08)
 
 
