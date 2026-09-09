@@ -46,8 +46,10 @@ single time.
 { "pi-cloudflare": { "apiToken": "${CLOUDFLARE_API_TOKEN}" } }
 ```
 
-Export `CLOUDFLARE_API_TOKEN` in your shell profile. The `api` server then
-skips OAuth entirely; the other four servers stay on browser OAuth.
+Export `CLOUDFLARE_API_TOKEN` in your shell profile. Native Pi also falls back
+to the owner-only `~/.pi/cloudflare-api-token` file created by the token-roll
+flow when the environment variable is unavailable. The `api` server then skips
+OAuth entirely; the other four servers stay on browser OAuth.
 
 ## 5. Verify
 

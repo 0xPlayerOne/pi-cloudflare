@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
+import { resolveApiToken } from './api-token.js'
 import type { PiCloudflareConfig } from './config.js'
 import { CloudflareRuntime } from './runtime.js'
 
@@ -73,7 +74,12 @@ export default function piCloudflareExtension(pi: PiHost): void {
 
   pi.on('session_start', async () => {
     await runtime?.stop()
-    runtime = new CloudflareRuntime({ config: loadUserConfig() ?? {}, warn })
+    const userConfig = loadUserConfig() ?? {}
+    const apiToken = resolveApiToken(userConfig)
+    runtime = new CloudflareRuntime({
+      config: apiToken ? { ...userConfig, apiToken } : userConfig,
+      warn,
+    })
     const registrations = await runtime.start()
     for (const registration of registrations) {
       pi.registerTool(registration)
