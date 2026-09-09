@@ -2,6 +2,7 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 import { Type } from 'typebox'
 
 import type { ServerConnection } from './client.js'
+import { capToolResultText } from './result-caps.js'
 
 export interface ToolRegistration {
   name: string
@@ -59,7 +60,7 @@ export function buildToolRegistrations(
       parameters: Type.Unsafe(tool.inputSchema),
       execute: async (_toolCallId, params) => {
         const result = await callUpstream(tool.name, params ?? {})
-        return toToolContent(result)
+        return capToolResultText(name, toToolContent(result))
       },
     }
   })
