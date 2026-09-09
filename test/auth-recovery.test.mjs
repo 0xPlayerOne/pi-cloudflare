@@ -1,5 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
+import { StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -38,6 +39,12 @@ describe('isAuthFailure', () => {
     ]) {
       assert.equal(isAuthFailure(new Error(message)), true, message)
     }
+  })
+
+  it('recognizes transport status codes when the response body is empty', () => {
+    const error = new StreamableHTTPError(401, 'Error POSTing to endpoint: ')
+    assert.equal(error.message, 'Streamable HTTP error: Error POSTing to endpoint: ')
+    assert.equal(isAuthFailure(error), true)
   })
 
   it('ignores operational failures', () => {

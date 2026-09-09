@@ -64,8 +64,19 @@ export function reauthHint(
 /** True when a failure smells like rejected credentials rather than a broken server. */
 export function isAuthFailure(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error)
-  return /\b401\b|\b403\b|unauthorized|invalid_token|invalid_grant|token refresh failed|expired|forbidden|authenticate/i.test(
-    message
+  const code =
+    error && typeof error === 'object' && 'code' in error
+      ? (error as { code?: unknown }).code
+      : undefined
+  // StreamableHTTPError keeps the HTTP status in `code`; auth responses may have no body.
+  return (
+    code === 401 ||
+    code === 403 ||
+    code === '401' ||
+    code === '403' ||
+    /\b401\b|\b403\b|unauthorized|invalid_token|invalid_grant|token refresh failed|expired|forbidden|authenticate/i.test(
+      message
+    )
   )
 }
 
