@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.0...pi-cloudflare-v0.6.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* **auth:** recover from empty-body MCP auth failures ([#37](https://github.com/0xPlayerOne/pi-cloudflare/issues/37)) ([dbb5a88](https://github.com/0xPlayerOne/pi-cloudflare/commit/dbb5a88e242caeb85dfbc48fd2bfd86158f0783e))
+
 ## [0.6.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.5...pi-cloudflare-v0.6.0) (2026-09-08)
 
 
