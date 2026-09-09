@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.1...pi-cloudflare-v0.6.2) (2026-09-09)
+
+
+### Bug Fixes
+
+* **auth:** load native static API token ([#39](https://github.com/0xPlayerOne/pi-cloudflare/issues/39)) ([a1a8742](https://github.com/0xPlayerOne/pi-cloudflare/commit/a1a8742553f550dba3533db5a0a7d99c0f25f68a))
+
 ## [0.6.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.0...pi-cloudflare-v0.6.1) (2026-09-09)
 
 
