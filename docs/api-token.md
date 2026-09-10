@@ -30,7 +30,7 @@ In the same builder, add these permission groups:
 | Logs Read                          | log queries                                                                                                                                                         |
 | Workers Builds Configuration Write | `workers_builds_*` tools (trigger PATCH + build-token DELETE need Edit, not just Read — verified 2026-09-07)                                                        |
 | Zone Cache Rules Edit              | zone Cache Rules read/write (zone-scoped; add only when agents manage `http_request_cache_settings`, e.g. per-route edge TTLs like `landing-marketplace-edge-300s`) |
-| Workers Observability Read         | `GET /accounts/{id}/workers/observability/*` usage/telemetry reads (Account scope; opt-in — verified missing 2026-09-10, exact API group name unconfirmed)          |
+| Workers Observability Read         | `GET /accounts/{id}/workers/observability/usage` reads (Account scope; live-proven 2026-09-10 on both accounts)                                                     |
 
 Skip Zone/DNS, Queues, and AI Gateway unless agents start managing them —
 403s name the missing group, and the extension surfaces them verbatim. Zone
