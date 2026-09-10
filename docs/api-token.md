@@ -22,15 +22,18 @@ from the **Edit Cloudflare Workers** template, which already includes:
 
 In the same builder, add these permission groups:
 
-| Group                    | Why                                  |
-| ------------------------ | ------------------------------------ |
-| Workers D1 Storage Write | `d1_*` tools (databases, query)      |
-| Hyperdrive Write         | `hyperdrive_*` tools (configs)       |
-| Account Analytics Read   | `query_worker_observability` rollups |
-| Logs Read                | log queries                          |
+| Group                    | Why                                                                                                                                                                 |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Workers D1 Storage Write | `d1_*` tools (databases, query)                                                                                                                                     |
+| Hyperdrive Write         | `hyperdrive_*` tools (configs)                                                                                                                                      |
+| Account Analytics Read   | `query_worker_observability` rollups                                                                                                                                |
+| Logs Read                | log queries                                                                                                                                                         |
+| Zone Cache Rules Edit    | zone Cache Rules read/write (zone-scoped; add only when agents manage `http_request_cache_settings`, e.g. per-route edge TTLs like `landing-marketplace-edge-300s`) |
 
 Skip Zone/DNS, Queues, and AI Gateway unless agents start managing them —
-403s name the missing group, and the extension surfaces them verbatim.
+403s name the missing group, and the extension surfaces them verbatim. Zone
+Cache Rules Edit stays opt-in (zone-scoped): grant it only when agents manage
+`http_request_cache_settings`.
 
 ## 3. Scope the accounts
 
