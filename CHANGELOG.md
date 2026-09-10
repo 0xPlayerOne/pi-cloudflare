@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.5](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.4...pi-cloudflare-v0.6.5) (2026-09-10)
+
+
+### Bug Fixes
+
+* **config:** correct validation file references ([#47](https://github.com/0xPlayerOne/pi-cloudflare/issues/47)) ([1b467cb](https://github.com/0xPlayerOne/pi-cloudflare/commit/1b467cbffaf71ad34965a3b675311caa7bab7d42))
+
 ## [0.6.4](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.3...pi-cloudflare-v0.6.4) (2026-09-10)
 
 
