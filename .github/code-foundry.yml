@@ -40,7 +40,7 @@ merge_strategy: squash
 release_merge_strategy: squash
 performance_command:
 performance_profile:
-performance_budget_file: performance-package-budgets.json
+performance_budget_file: performance-budget.json
 draft_protection: true
 required_capabilities:
 coverage_enforcement: auto
