@@ -2,20 +2,30 @@
 /**
  * pi-cloudflare setup: one-time browser OAuth for every Cloudflare MCP
  * server. Each server is its own OAuth issuer, so approval happens once per
- * server (docs needs none). Tokens (with refresh) are stored owner-only in
- * ~/.pi/cloudflare-tokens.json and refreshed automatically afterwards.
+ * server (docs needs none).
+ *
+ * Native Pi defaults to ~/.pi/cloudflare-tokens.json. Agent Plugins clients
+ * pass --token-file with their ${PLUGIN_DATA} path so credentials remain
+ * client-local and do not require Pi to be installed.
  *
  * Usage:
- *   pi-cloudflare-setup                  # authorize missing/expired servers
- *   pi-cloudflare-setup --only builds    # re-auth specific servers
+ *   pi-cloudflare-setup
+ *   pi-cloudflare-setup --only builds
  *   pi-cloudflare-setup --only api,observability
+ *   pi-cloudflare-setup --token-file /path/to/cloudflare-tokens.json --only api
  *
  * Nothing secret is ever logged or written anywhere else.
  */
 import { connectAll } from '../dist/client.js'
 import { CLOUDFLARE_SERVERS } from '../dist/servers.js'
 import { runOAuthFlow } from '../dist/auth-flow.js'
-import { partitionServers, readTokenFile, writeTokenFile } from '../dist/token-store.js'
+import {
+  partitionServers,
+  readTokenFile,
+  readTokenFileAt,
+  writeTokenFile,
+  writeTokenFileAt,
+} from '../dist/token-store.js'
 
 const AUTHED_IDS = ['api', 'bindings', 'builds', 'observability']
 
@@ -39,9 +49,14 @@ function parseOnly() {
   return ids
 }
 
+const tokenFile = argValue('--token-file')
+const readStore = () => (tokenFile ? readTokenFileAt(tokenFile) : readTokenFile())
+const writeStore = (servers) =>
+  tokenFile ? writeTokenFileAt(servers, tokenFile) : writeTokenFile(servers)
+
 const only = parseOnly()
 const wanted = only ?? AUTHED_IDS
-const file = readTokenFile() ?? { version: 1, servers: {} }
+const file = readStore() ?? { version: 1, servers: {} }
 const { fresh, needed } = partitionServers(wanted, file.servers)
 
 if (fresh.length > 0) {
@@ -62,7 +77,7 @@ if (needed.length === 0) {
     try {
       const { tokens, clientId, tokenEndpoint } = await runOAuthFlow(definition)
       file.servers[id] = { ...tokens, clientId, tokenEndpoint }
-      writeTokenFile(file.servers)
+      writeStore(file.servers)
       console.log(`[${index}/${needed.length}] ${id}: authorized and stored\n`)
     } catch (error) {
       console.log(
@@ -73,7 +88,7 @@ if (needed.length === 0) {
 }
 
 console.log('Verifying all servers...\n')
-const stored = readTokenFile()
+const stored = readStore()
 let okCount = 0
 const failed = []
 for (const definition of CLOUDFLARE_SERVERS) {
@@ -98,6 +113,7 @@ for (const definition of CLOUDFLARE_SERVERS) {
 
 console.log(`\n${okCount}/5 servers working.`)
 if (failed.length > 0) {
-  console.log(`Re-authenticate with: pi-cloudflare-setup --only ${failed.join(',')}`)
+  const tokenArg = tokenFile ? ` --token-file ${JSON.stringify(tokenFile)}` : ''
+  console.log(`Re-authenticate with: pi-cloudflare-setup${tokenArg} --only ${failed.join(',')}`)
   process.exit(1)
 }

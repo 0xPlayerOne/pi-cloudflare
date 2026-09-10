@@ -151,7 +151,7 @@ Delete transport settings entirely. Remove session APIs. Isolate users with **se
 
 ### Deploy cutover
 
-Staging/branch first. Production is **one** deploy of matching Worker + image:
+Validate a preview deployment first. Production is **one** deploy of matching Worker + image:
 
 ```sh
 npx wrangler deploy --containers-rollout=immediate

@@ -1,5 +1,7 @@
 # Contributing
 
+<!-- code-foundry-managed: config-aware-policy -->
+
 This guide is the operating contract for humans and automation contributing to this repository.
 
 It applies to TypeScript, Rust, Python, and mixed-language projects using this template.
@@ -19,7 +21,7 @@ Agents must follow these rules before changing code:
 3. Preserve user-owned changes. Never discard or overwrite unrelated work.
 4. Branch from `main` and target pull requests at `main`; do not push directly to `main`.
 5. Keep the change focused. Do not expand scope without documenting why.
-6. Run the applicable format, lint, type-check, build, unit, integration, E2E, smoke, and security checks.
+6. Run the applicable format, lint, type-check, build, unit, performance, integration, E2E, smoke, and security checks.
 7. Report exact validation results, skipped checks, known limitations, and remaining risks.
 8. Never commit secrets, credentials, local environment files, generated artifacts, or machine-specific paths.
 
@@ -29,6 +31,31 @@ Agents must not:
 - Bypass hooks or required checks to hide a failure.
 - Change branch protections, secrets, deployments, or external systems unless that action is explicitly in scope.
 - Claim completion when tests, deployment checks, or required reviews are still pending.
+
+<!-- code-foundry-managed: pull-request-policy -->
+
+### Pull request readiness (mandatory)
+
+This repository uses the `direct` workflow. Topic pull requests target `main`.
+
+- Open every ordinary pull request as a draft. Use `gh pr create --draft` or
+  set `draft: true` in the GitHub API; never create a ready ordinary pull
+  request as a shortcut.
+- Keep ordinary pull requests in draft while preparing them. The generated
+  Draft Guard converts ready ordinary pull requests to draft when they are
+  opened or reopened, and runner-heavy validation starts only after an
+  explicit `ready_for_review` transition unless `draft_protection: false` is
+  configured for generated callers. That opt-out does not disable Draft Guard
+  or draft-PR automation. Cloudflare reusable callers use
+  `draft-protection: false`.
+- Run local validation and finish review preparation before marking an ordinary
+  pull request ready. Ready pull requests stay ready when new commits arrive,
+  and validation reruns for the current head; draft updates allocate no
+  validation runner until the pull request is ready.
+- Release Please version pull requests are managed by the Code Foundry release
+  workflow; do not manually change their draft state unless the workflow asks.
+
+<!-- /code-foundry-managed: pull-request-policy -->
 
 ## Branching model
 
@@ -46,7 +73,7 @@ docs/*  test/*  refactor/*         │
 | `main`                                                         | Protected release branch | Merge through pull requests only. No direct pushes.    |
 | `feat/*`, `fix/*`, `chore/*`, `refactor/*`, `docs/*`, `test/*` | Focused work             | Branch from `main`; keep changes small and reviewable. |
 
-The Git workflow is `direct`: topic branches **squash** directly into `main`, and the Release Please version PR **rebases** into `main` (`release_merge_strategy: rebase`). Release automation never defaults to a merge method and never merges with `--admin`; `code-foundry doctor` and `code-foundry sync` fail closed on any other release merge strategy. Feature branches never touch `staging`; repositories with a preview/staging environment opt into `git_workflow: staging-release` explicitly.
+The Git workflow is `direct`: topic branches **squash** directly into `main`, and the Release Please version PR **squashes** into `main` (`release_merge_strategy: squash`). Release automation never defaults to a merge method and never merges with `--admin`; `code-foundry doctor` and `code-foundry sync` fail closed on any other release merge strategy. This repository has one protected integration and release branch: `main`.
 
 ## Before you start
 
@@ -151,14 +178,18 @@ Keep pull requests focused and reviewable. Include screenshots or recordings for
 
 ## Workflow and check behavior
 
-| Event | Expected automation |
-|------------------------------------------------------------------------------------------------------------------------------------------------|
-| Pull request targeting `main` | Audit validation: CI, full tests, Security, and CodeQL, ending in `Validation / Gate` |
-| Exact Release Please pull request targeting `main` | Release-policy validation only, ending in `Validation / Gate` |
-| Scheduled or manual validation | Full audit tier |
-| Push to a working branch | Draft PR workflow |
-| Push to `main` | Release workflow; canonical validation already ran on the merged PR |
-The single validation caller keys concurrency by event and pull-request head. A newer update to the same pull request cancels its superseded validation run; scheduled and manual audits remain independent. The mode-aware orchestrator fans out only the jobs required by that event and always concludes with the stable aggregate gate.
+| Event                                              | Expected automation                                                                   |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Draft pull request targeting `main`                | No runner-heavy validation; run local checks before requesting review                 |
+| Ready pull request targeting `main`                | Audit validation: CI, full tests, Security, and CodeQL, ending in `Validation / Gate` |
+| Exact Release Please pull request targeting `main` | Full validation: CI, full tests, Security, and CodeQL, ending in `Validation / Gate`  |
+| Scheduled or manual validation                     | Full audit tier                                                                       |
+| Push to a working branch                           | Draft PR workflow                                                                     |
+| Push to `main`                                     | Release workflow plus default-branch CodeQL scan; validation ran on the merged PR     |
+
+Draft pull requests do not start validation unless `draft_protection: false` is configured. The lightweight Draft Guard converts ordinary pull requests opened or reopened while ready back to draft; it never checks out pull-request code and it excludes Release Please version heads, whose release workflow owns their state. Marking a pull request ready for review starts the applicable validation tier, and each new commit on a ready pull request reruns that tier for the current head. Draft updates allocate no validation runner while protection is enabled. Converting a pull request to draft runs only the lightweight cancellation control.
+
+Pull-request validation keys concurrency by event and pull-request head, so a newer update cancels its superseded run. Scheduled and manual audits use a separate caller pinned to the protected default branch; this prevents caller-selected runtime code from executing with default-branch cache access. Pull-request and scheduled/manual callers use the mode-aware orchestrator, which fans out only the required jobs and concludes with the stable aggregate gate. Main pushes run the default-branch CodeQL lane separately.
 
 Required checks are enforced by branch protection rulesets/branch protection. Do not duplicate their checklists in the pull request description; document validation commands and results instead.
 
@@ -170,10 +201,11 @@ Security checks can be skipped when repository visibility or the GitHub plan doe
 
 ## Review and merge protocol
 
-| Change | Target | Merge method | Merge gate |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Working branch | `main` | Squash | All applicable required checks pass |
-| Release Please version PR | `main` | Rebase (`release_merge_strategy`, fails closed) | Validation gate and release policy pass |
+| Change                    | Target | Merge method                      | Merge gate                              |
+| ------------------------- | ------ | --------------------------------- | --------------------------------------- |
+| Working branch            | `main` | Squash                            | All applicable required checks pass     |
+| Release Please version PR | `main` | Squash (`release_merge_strategy`) | Validation gate and release policy pass |
+
 Reviewers focus on correctness, security, maintainability, test coverage, operational impact, and compatibility. Authors remain responsible for responding to feedback and verifying the final commit.
 
 ## Security and emergencies

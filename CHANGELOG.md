@@ -1,5 +1,64 @@
 # Changelog
 
+## [0.6.2](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.1...pi-cloudflare-v0.6.2) (2026-09-09)
+
+
+### Bug Fixes
+
+* **auth:** load native static API token ([#39](https://github.com/0xPlayerOne/pi-cloudflare/issues/39)) ([a1a8742](https://github.com/0xPlayerOne/pi-cloudflare/commit/a1a8742553f550dba3533db5a0a7d99c0f25f68a))
+
+## [0.6.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.0...pi-cloudflare-v0.6.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* **auth:** recover from empty-body MCP auth failures ([#37](https://github.com/0xPlayerOne/pi-cloudflare/issues/37)) ([dbb5a88](https://github.com/0xPlayerOne/pi-cloudflare/commit/dbb5a88e242caeb85dfbc48fd2bfd86158f0783e))
+
+## [0.6.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.5...pi-cloudflare-v0.6.0) (2026-09-08)
+
+
+### Features
+
+* add Agent Plugins 1.0 dual distribution ([#34](https://github.com/0xPlayerOne/pi-cloudflare/issues/34)) ([a4499b3](https://github.com/0xPlayerOne/pi-cloudflare/commit/a4499b3c9147678947eb63f7fd0448a475adda66))
+
+
+### Bug Fixes
+
+* **ci:** ignore release-managed plugin manifest formatting ([#36](https://github.com/0xPlayerOne/pi-cloudflare/issues/36)) ([f2bb1da](https://github.com/0xPlayerOne/pi-cloudflare/commit/f2bb1da3393d7c2d8a4cede625fc51a2edcfad4b))
+
+## [0.5.5](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.4...pi-cloudflare-v0.5.5) (2026-09-08)
+
+
+### Maintenance
+
+* **ci:** upgrade Code Foundry to v1.9.11 ([#31](https://github.com/0xPlayerOne/pi-cloudflare/issues/31)) ([e8f9852](https://github.com/0xPlayerOne/pi-cloudflare/commit/e8f98525305616f204471d4fd547151c754be9c4))
+
+## [0.5.4](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.3...pi-cloudflare-v0.5.4) (2026-09-08)
+
+
+### Tests
+
+* **perf:** add M0 regression audit ([#29](https://github.com/0xPlayerOne/pi-cloudflare/issues/29)) ([9ef68b6](https://github.com/0xPlayerOne/pi-cloudflare/commit/9ef68b675db4de21068e2d73796c5e8da17445d1))
+
+## [0.5.3](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.2...pi-cloudflare-v0.5.3) (2026-09-08)
+
+
+### Maintenance
+
+* **code-foundry:** upgrade to v1.5.0 ([#27](https://github.com/0xPlayerOne/pi-cloudflare/issues/27)) ([acba3d6](https://github.com/0xPlayerOne/pi-cloudflare/commit/acba3d61223d9067f37cce1fdbe9e64e65976cd8))
+
+## [0.5.2](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.1...pi-cloudflare-v0.5.2) (2026-09-07)
+
+
+### Bug Fixes
+
+* **ci:** pin generated callers to the adopted v1.4.1 runtime ([#25](https://github.com/0xPlayerOne/pi-cloudflare/issues/25)) ([2da66bf](https://github.com/0xPlayerOne/pi-cloudflare/commit/2da66bf462e9209e1fffecc8a6b14b0578c00716))
+
+
+### Maintenance
+
+* **code-foundry:** upgrade to v1.4.1 ([#22](https://github.com/0xPlayerOne/pi-cloudflare/issues/22)) ([8c8e1a4](https://github.com/0xPlayerOne/pi-cloudflare/commit/8c8e1a43529a3346d00554ca976b1c5d05fc20d3))
+
 ## [0.5.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.5.0...pi-cloudflare-v0.5.1) (2026-09-07)
 
 

@@ -22,21 +22,26 @@ from the **Edit Cloudflare Workers** template, which already includes:
 
 In the same builder, add these permission groups:
 
-| Group                              | Why                                  |
-| ---------------------------------- | ------------------------------------ |
-| Workers D1 Storage Write           | `d1_*` tools (databases, query)      |
-| Hyperdrive Write                   | `hyperdrive_*` tools (configs)       |
-| Account Analytics Read             | `query_worker_observability` rollups |
-| Logs Read                          | log queries                          |
-| Workers Builds Configuration Write | `workers_builds_*` tools             |
-
-Workers Builds needs the Edit level, not just Read: listing builds and
-reading logs work with Read, but repairing a trigger (PATCH) or removing a
-stale build token (DELETE) requires Write — verified 2026-09-07 when two
-preview triggers pointed at a rolled token.
+| Group                              | Why                                                                                                                                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Workers D1 Storage Write           | `d1_*` tools (databases, query)                                                                                                                                     |
+| Hyperdrive Write                   | `hyperdrive_*` tools (configs)                                                                                                                                      |
+| Account Analytics Read             | `query_worker_observability` rollups                                                                                                                                |
+| Logs Read                          | log queries                                                                                                                                                         |
+| Workers Builds Configuration Write | `workers_builds_*` tools (trigger PATCH + build-token DELETE need Edit, not just Read — verified 2026-09-07)                                                        |
+| Zone Cache Rules Edit              | zone Cache Rules read/write (zone-scoped; add only when agents manage `http_request_cache_settings`, e.g. per-route edge TTLs like `landing-marketplace-edge-300s`) |
+| Workers Observability Read         | `GET /accounts/{id}/workers/observability/*` usage/telemetry reads (Account scope; opt-in — verified missing 2026-09-10, exact API group name unconfirmed)          |
 
 Skip Zone/DNS, Queues, and AI Gateway unless agents start managing them —
-403s name the missing group, and the extension surfaces them verbatim.
+403s name the missing group, and the extension surfaces them verbatim. Zone
+Cache Rules Edit stays opt-in (zone-scoped): grant it only when agents manage
+`http_request_cache_settings`.
+
+Known non-gaps (do not chase with this token): Logpush jobs
+(`GET /accounts/{id}/logpush/jobs` 401s — no Logpush group is exposed to API
+tokens; manage Logpush in the dashboard) and the token-management endpoints
+themselves (`9109` by design). Worker Tail also needs a websocket — group
+presence plus the dashboard UI is the check, not an API read.
 
 ## 3. Scope the accounts
 
@@ -52,8 +57,10 @@ single time.
 { "pi-cloudflare": { "apiToken": "${CLOUDFLARE_API_TOKEN}" } }
 ```
 
-Export `CLOUDFLARE_API_TOKEN` in your shell profile. The `api` server then
-skips OAuth entirely; the other four servers stay on browser OAuth.
+Export `CLOUDFLARE_API_TOKEN` in your shell profile. Native Pi also falls back
+to the owner-only `~/.pi/cloudflare-api-token` file created by the token-roll
+flow when the environment variable is unavailable. The `api` server then skips
+OAuth entirely; the other four servers stay on browser OAuth.
 
 ## 5. Verify
 

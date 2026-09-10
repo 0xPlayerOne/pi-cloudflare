@@ -2,14 +2,16 @@ import { describe, it, beforeEach, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync, statSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join, dirname } from 'node:path'
+import { dirname, join } from 'node:path'
 
 import {
   isExpired,
   partitionServers,
   readTokenFile,
+  readTokenFileAt,
   tokenFilePath,
   writeTokenFile,
+  writeTokenFileAt,
 } from '../dist/token-store.js'
 
 describe('token-store', () => {
@@ -38,6 +40,22 @@ describe('token-store', () => {
     writeTokenFile(servers, home)
     assert.equal(statSync(tokenFilePath(home)).mode & 0o777, 0o600)
     assert.deepEqual(readTokenFile(home)?.servers, servers)
+  })
+
+  it('round-trips an explicit Agent Plugin data path', () => {
+    const path = join(home, 'plugin-data', 'cloudflare-tokens.json')
+    const servers = {
+      builds: {
+        accessToken: 'at-plugin',
+        refreshToken: 'rt-plugin',
+        expiresAt: Date.now() + 3600_000,
+        clientId: 'client-plugin',
+        tokenEndpoint: 'https://mcp.example.com/token',
+      },
+    }
+    writeTokenFileAt(servers, path)
+    assert.equal(statSync(path).mode & 0o777, 0o600)
+    assert.deepEqual(readTokenFileAt(path)?.servers, servers)
   })
 
   it('rejects corrupt files instead of throwing', () => {

@@ -16,19 +16,18 @@ There is no public roll endpoint (`POST /user/tokens/:id/roll` returns `7000 No 
 
 1. My Profile → API Tokens → token row Actions → Roll.
 2. Menu interaction notes: open the Actions menu, then drive the dialog with DOM clicks if a11y clicks stall (dialog buttons sometimes need `querySelector` + `.click()` while a11y clicks dismiss). Confirm only the intended token (dialog names it — read it back before confirming).
-3. The secret modal (`Token rolled successfully` / `Copy your API token now`) holds the **only copy**. Capture `cfut_...` immediately.
+3. The secret modal (`Token rolled successfully` / `Copy your API token now`) holds the **only copy**. Capture `cfut_...` immediately without printing it in chat or logs.
 4. Click Done. Verify the token row still shows Active.
 5. Validate before handoff: `GET /user` (identity), one scoped read per newly relied-upon group (see cloudflare-api-token skill matrix). `GET /user/tokens/:id` confirming policies is safe (never returns the secret).
-6. **Store it for them — never hand off manual steps.** The user must not need to touch anything:
-   - Write `export CLOUDFLARE_API_TOKEN="<secret>"` to `~/.pi/cloudflare-api-token` (mode `0600`, no other content that matters).
-   - Ensure `~/.zshrc` sources it inside a marked idempotent block (`# >>> pi-managed: cloudflare-api-token >>>` … `# <<< pi-managed: cloudflare-api-token <<<`), replacing any previous block.
-   - Set `~/.pi/agent/settings.json` → `pi-cloudflare.apiToken` to the literal string `${CLOUDFLARE_API_TOKEN}` (reference, never the secret). Preserve every other key byte-for-byte in meaning.
-   - Verify: fresh interactive shell resolves a 53-char value; settings parses; one live API read succeeds.
-   - Tell the user to open a new terminal (or `source ~/.zshrc`) and restart Pi sessions so the new environment is picked up.
-7. Destroy temp copies. Report stored + verified **without printing the secret**.
+6. **Store it through the active host's secret mechanism — never put the literal in repository configuration.**
+   - **Native Pi:** write `export CLOUDFLARE_API_TOKEN="<secret>"` to `~/.pi/cloudflare-api-token` (mode `0600`); ensure `~/.zshrc` sources it inside the marked idempotent block; set `~/.pi/agent/settings.json` → `pi-cloudflare.apiToken` to the literal reference `${CLOUDFLARE_API_TOKEN}`; preserve every other setting; then verify a fresh shell and one live API read.
+   - **Agent Plugin:** Agent Plugins 1.0 has no portable secret-reference field. Store the value with the client's own secret/environment facility so the plugin MCP subprocess receives `CLOUDFLARE_API_TOKEN`. Do not write the API token into `${PLUGIN_DATA}` yourself; that directory is reserved here for the package-managed browser OAuth token store. Restart or reload the plugin if the client only snapshots environment at process launch, then verify one live API read.
+   - **Unknown host:** stop before writing. Ask where that client stores MCP environment secrets; never guess a Pi path.
+7. Destroy temporary copies. Report stored + verified **without printing the secret**.
 
 ## What success looks like
 
 - Exactly one active token under the expected name (list and check for duplicates — a failed first attempt often leaves one behind).
 - `modified_on` bumped, old secret rejected (spot-check one call with it only if exposure is suspected; otherwise just rotate wiring).
+- The active host can resolve the new token after a fresh MCP/session start and one live scoped read succeeds.
 - Never retry-loop the confirm dialog. One confirm, one capture.
