@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.3](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.2...pi-cloudflare-v0.6.3) (2026-09-10)
+
+
+### Maintenance
+
+* **ci:** upgrade Code Foundry to v1.22.1 ([0030a7c](https://github.com/0xPlayerOne/pi-cloudflare/commit/0030a7ccf600de2e8c719e1e69003364ea8c3b54))
+* **token:** permissions + result caps + node 24 + CF v1.28.2 ([#42](https://github.com/0xPlayerOne/pi-cloudflare/issues/42)) ([0030a7c](https://github.com/0xPlayerOne/pi-cloudflare/commit/0030a7ccf600de2e8c719e1e69003364ea8c3b54))
+
 ## [0.6.2](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.1...pi-cloudflare-v0.6.2) (2026-09-09)
 
 
