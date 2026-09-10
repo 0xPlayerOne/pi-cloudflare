@@ -26,6 +26,23 @@ Prefer updating in place: the secret survives, wiring stays intact, and the chan
 - Same-origin `/api/v4/*` in page context carries the session (persistent browser, headed for dashboard pages). `Content-Type: application/json` required.
 - Verify after: re-GET the token and diff policies, then exercise one live read per changed group. A 403 afterward means the group mapping was wrong, not the mechanism.
 
+## When you cannot self-serve: hand off with the exact spec
+
+PUT needs a token that can manage tokens (API tokens get `9109` by design),
+and the dashboard path needs a headed browser plus a human for Turnstile.
+When neither is available, do not guess — hand the human the exact row to
+add:
+
+- Derive the group from the failing call, not from memory: the tool plus
+  endpoint determines it (e.g. `/accounts/{id}/builds/*` → Workers Builds
+  Configuration).
+- Derive the level from the HTTP method: GET → Read, anything else → Edit.
+- Include the scope: account-scoped groups need every managed account
+  included under Account Resources.
+- Format it as dashboard rows so the human pastes without translating:
+  `Account | Workers Builds Configuration | Edit`, one line per row, exact
+  labels.
+
 ## When update is the wrong tool
 
 - Secret lost or leaked → cloudflare-token-roll (no public roll route; UI flow).

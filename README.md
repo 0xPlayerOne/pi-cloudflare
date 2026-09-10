@@ -22,6 +22,11 @@ helper**, distributed both as a native Pi package and an
   | `cf_builds_*`   | Workers Builds insights                  |
   | `cf_obs_*`      | Workers logs/metrics/traces              |
 
+Large upstream text results (e.g. full Worker bundles) are truncated to
+32 KiB per text block with a recovery hint instead of landing verbatim in
+agent context. Override locally with `PI_CLOUDFLARE_MAX_TEXT_BYTES` when a
+task genuinely needs more.
+
 Requires Node 20.19+ (or 22.12+) and network access. Native Pi installation
 also requires Pi package support. No browser, wrangler CLI, or API token is
 needed to install; the docs tools work immediately after install.
@@ -86,6 +91,7 @@ In `~/.pi/agent/settings.json`:
   "pi-cloudflare": {
     "servers": { "builds": false }, // disable individual servers
     "connectTimeoutMs": 30000,
+    // Env override also available: PI_CLOUDFLARE_MAX_TEXT_BYTES (default 32768)
   },
 }
 ```

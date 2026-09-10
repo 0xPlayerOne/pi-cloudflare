@@ -5,9 +5,9 @@
   "printWidth": 100,
   "ignorePatterns": [
     "CHANGELOG.md",
-    "plugin.json",
     ".github/.code-foundry",
     ".github/actions/",
+    "plugin.json",
     "node_modules/",
     "dist/",
     "coverage/",
