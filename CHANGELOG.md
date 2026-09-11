@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.8](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.7...pi-cloudflare-v0.6.8) (2026-09-11)
+
+
+### Maintenance
+
+* **config:** right-size runner lanes and drop default shard overrides ([#53](https://github.com/0xPlayerOne/pi-cloudflare/issues/53)) ([ed7e60b](https://github.com/0xPlayerOne/pi-cloudflare/commit/ed7e60b59f843ffe036137d1fa985b0a0808469e))
+
 ## [0.6.7](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.6...pi-cloudflare-v0.6.7) (2026-09-11)
 
 
