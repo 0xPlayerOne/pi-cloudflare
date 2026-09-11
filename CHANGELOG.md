@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.6](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.5...pi-cloudflare-v0.6.6) (2026-09-11)
+
+
+### Documentation
+
+* **token:** running PR — agent API token permission gaps ([#49](https://github.com/0xPlayerOne/pi-cloudflare/issues/49)) ([4303740](https://github.com/0xPlayerOne/pi-cloudflare/commit/4303740ec9f3b5a7a9900cdf1c4a5d94b05fc14a))
+
 ## [0.6.5](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.4...pi-cloudflare-v0.6.5) (2026-09-10)
 
 
