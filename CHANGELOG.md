@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.7](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.6...pi-cloudflare-v0.6.7) (2026-09-11)
+
+
+### Documentation
+
+* **audit:** free-plan hardening applied across 16 zones ([#51](https://github.com/0xPlayerOne/pi-cloudflare/issues/51)) ([ef2b6eb](https://github.com/0xPlayerOne/pi-cloudflare/commit/ef2b6eb575b91609644274d7a681d7dd680239d0))
+
 ## [0.6.6](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.5...pi-cloudflare-v0.6.6) (2026-09-11)
 
 
