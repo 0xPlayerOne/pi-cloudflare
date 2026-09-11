@@ -107,6 +107,73 @@ These are production architecture decisions for the site owners, not
 audit-time config flips. Treat the nine `cname_record_not_proxied` insights as
 **intentional until decided**, and do not mass-proxy them to clear the list.
 
+## Registrar: where the DS record actually comes from
+
+The estate splits across registrars, which decides who can finish DNSSEC:
+
+| Registrar                | Zones                                                                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Cloudflare               | adea.dev, dubdev.com, niftyleague.app, niftyleague.co, niftyleague.dev, niftyleague.net, niftyleague.org, pinkbinder.blog, pinkbinder.shop |
+| Squarespace Domains      | andrewmf.com, nifty-league.com, niftyleague.com, niftysmashers.com                                                                         |
+| Namecheap                | pinkbinder.store                                                                                                                           |
+| other / RDAP unavailable | nftl.nl, niftyworld.gg                                                                                                                     |
+
+**The registrar DS step cannot be automated with an API token.** This was
+checked exhaustively rather than assumed:
+
+- The Registrar API exposes `registrar/domains`, `registrar/registrations`, and
+  their sub-resources. Grepping the full published OpenAPI spec for
+  `dnssec` / `ds_record` inside every registrar section returns **zero** matches.
+- `PUT /accounts/:id/registrar/domains/:domain` is documented and accepts only
+  `auto_renew`, `locked`, and `privacy`. Sending `ds_records` returns `200` and
+  changes nothing — the same silent-no-op class of trap as `PATCH /settings/:id`.
+  Verified harmless: the domain record was byte-identical afterwards.
+- Domain objects carry a read-only `ds_records` array. A domain whose DS is
+  published (adea.dev) shows the record there; one awaiting publication
+  (niftyleague.app) shows `[]`.
+
+So for Cloudflare-registered domains the DS is published from the **dashboard**
+during the DNSSEC enable flow. For the other registrars it must be added as a DS
+record at that registrar. Zone-side state is correct everywhere: DNSSEC is
+`pending` with the key material present and CDS/CDNSKEY published, so only the
+parent-side DS is outstanding. Resolution is unaffected until it lands
+(`NOERROR` throughout, and an absent DS cannot break validation).
+
+## Turnstile secrets live in Secrets Store
+
+The three widgets' sitekey/secret pairs were captured at creation and written to
+**Cloudflare Secrets Store** in each account. Turnstile returns the secret only
+in the create response, so a missed capture means rotating the widget.
+
+Notes for anyone repeating this:
+
+- Free plan allows **one store per account**. Adea and Pink Binder already had
+  one (`control-plane-neon`, `default_secrets_store`), so those are reused
+  rather than replaced; Nifty League and Personal got a `pi-cloudflare` store.
+- The create endpoint takes a **bulk array**, not a single object
+  (`POST /accounts/:id/secrets_store/stores/:store_id/secrets` with
+  `[{name, value, scopes}]`). A bare object fails with
+  `1001 invalid_json_body`.
+- `scopes: ["workers"]` binds each secret for Workers consumption.
+- Stored values are write-only on read-back, which is why they must be captured
+  at creation.
+
+## Vercel migration is unblocked
+
+Both apexes were confirmed to resolve straight to Vercel, and the estate is ready
+for the rest to follow:
+
+- **No CAA records on any of the 16 zones**, so no CA is restricted — Vercel can
+  issue certificates for any domain moved over. A restrictive CAA would have been
+  the classic silent blocker here.
+- All 16 zones already run `ssl: full` with `always_use_https: on` and
+  `min_tls_version: 1.2`, which is the correct baseline in front of Vercel.
+- Cloudflare must stay in front of the Vercel origins for the zone features in
+  this document to apply at all, which is the reason the apex records are left
+  proxied rather than delegated to Vercel's nameservers.
+- Every zone keeps its DNSSEC key material and CDS/CDNSKEY published, so the DS
+  can be completed at any registrar without touching zone config.
+
 ## security.txt has no API
 
 Security Center suggests `security_txt_not_enabled`, but there is no public
