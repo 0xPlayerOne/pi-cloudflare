@@ -70,10 +70,21 @@ zones have zero managed coverage by default. Deploying it is one `PUT` to
 ```
 
 Coverage is 31 rules against specific CVEs (Log4j, Shellshock, WordPress
-plugin/injection families), not a general WAF. Verified blocking with Log4j
-headers, a Log4j URI, and a Shellshock User-Agent (all `403`) while normal
-traffic and assets stayed `200`. SQLi/XSS payloads are **not** in the free set —
-do not read a `200` on those as a broken deploy.
+plugin/injection families), not a general WAF.
+
+Verified blocking, with normal traffic and assets staying `200`:
+
+| Probe                                      | Result                        |
+| ------------------------------------------ | ----------------------------- |
+| `${jndi:ldap://…}` in a request **header** | `403` — blocked               |
+| Shellshock payload in `User-Agent`         | `403` — blocked               |
+| `${jndi:ldap://…}` in the **URI path**     | `307`/`308` — **not blocked** |
+
+The URI case is the one to be careful about: those codes are Cloudflare's
+path-normalization redirects, not a block. Log4j's URI vector is therefore not
+covered by the free set, so do not treat a non-403 on a URI payload as a broken
+deploy — and do not claim URI coverage. SQLi/XSS payloads are likewise **not** in
+the free set.
 
 ## The finding that matters most: unproxied apexes bypass everything
 
