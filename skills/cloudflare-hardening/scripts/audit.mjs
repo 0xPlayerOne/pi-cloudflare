@@ -207,13 +207,31 @@ async function auditZone(zone) {
   }
 
   // Bot management (AI bots / fight mode live here, not under /settings).
+  // enable_js injects a detection script into every HTML response, so it is a
+  // performance finding rather than a security gap. fight_mode is a genuine
+  // tradeoff and is reported, not flagged.
   const bot = await get(`/zones/${zone.id}/bot_management`)
   if (bot.result) {
-    if (bot.result.ai_bots_protection && bot.result.ai_bots_protection !== 'block') {
-      add(zone.name, 'info', 'ai_bots_protection', `currently ${bot.result.ai_bots_protection}`, 'consider "block" (PUT, not PATCH)')
+    if (bot.result.enable_js === true) {
+      add(
+        zone.name,
+        'high',
+        'javascript detections',
+        'injects /cdn-cgi/challenge-platform/scripts/jsd/main.js into every HTML response',
+        'turn off (PUT bot_management {enable_js:false}) — it trips Lighthouse Best Practices "deprecated API"'
+      )
     }
-    if (bot.result.fight_mode === false) {
-      add(zone.name, 'info', 'bot fight mode', 'disabled', 'consider enabling')
+    if (bot.result.fight_mode === true) {
+      add(
+        zone.name,
+        'info',
+        'bot fight mode',
+        'on — a real tradeoff, not a free win',
+        'adds edge protection but costs roughly 40 Lighthouse Best-Practices points via the injected detection script'
+      )
+    }
+    if (bot.result.ai_bots_protection && bot.result.ai_bots_protection !== 'block') {
+      add(zone.name, 'info', 'ai_bots_protection', `currently ${bot.result.ai_bots_protection}`, 'consider "block" — enforced at the edge, injects no script')
     }
   }
 
