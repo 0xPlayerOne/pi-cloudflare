@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.8.0...pi-cloudflare-v0.8.1) (2026-09-12)
+
+
+### Documentation
+
+* **skills:** explain why API-enabled DNSSEC never publishes its DS record ([#64](https://github.com/0xPlayerOne/pi-cloudflare/issues/64)) ([949f570](https://github.com/0xPlayerOne/pi-cloudflare/commit/949f570ec7ea42771bed3e8c35090367f90510e1))
+
 ## [0.8.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.7.0...pi-cloudflare-v0.8.0) (2026-09-12)
 
 
