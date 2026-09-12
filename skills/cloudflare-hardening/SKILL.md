@@ -103,6 +103,17 @@ Then check the ruleset phases and add what is missing:
 - **`http_request_cache_settings`** — only with a measured reason; see
   [Safety rules](#safety-rules-do-not-blanket-change).
 
+And remove what hurts performance. Hardening is not only additive:
+
+- **`enable_js` (JavaScript Detections)** — injects
+  `/cdn-cgi/challenge-platform/scripts/jsd/main.js` into every HTML response and
+  trips Lighthouse Best Practices "Avoid deprecated APIs", costing roughly 40
+  Best-Practices points on a fast site. Turn it off; it protects nothing that
+  `ai_bots_protection: "block"` does not cover without injecting anything.
+- **`fight_mode` (Bot Fight Mode)** — a genuine tradeoff rather than a free win.
+  It adds edge protection but rides on the same injected detection script. Report
+  the cost and let the user choose.
+
 ### 3. Per zone: DNSSEC
 
 Read `GET /zones/:id/dnssec`. If `disabled`, it is safe to stage: enabling is
