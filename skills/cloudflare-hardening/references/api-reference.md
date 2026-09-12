@@ -66,13 +66,42 @@ Check that field before attempting a write; the PATCH will not tell you.
 The AI-bot and fight-mode fields live here, not under `/settings`. Use `PUT` —
 `PATCH` answers `405 10405`.
 
+Send **only the fields being changed**. Echoing the whole object back fails with
+`400 Bad Request`, because the write rejects computed and read-only fields
+(`is_robots_txt_managed`, `using_latest_model`, and friends). Every other
+setting is preserved on its own, so a partial body is correct rather than risky.
+
 ```jsonc
-// read first, then write back the merged object
+// read first to see what is on
 GET /zones/:zone_id/bot_management
 
 PUT /zones/:zone_id/bot_management
 { "ai_bots_protection": "block" }   // disabled | only_on_ad_pages | block
 ```
+
+### JavaScript Detections and Bot Fight Mode inject a script
+
+Two fields on the same object add JavaScript to **every HTML response**:
+
+| Field | Dashboard toggle | Effect |
+| --- | --- | --- |
+| `enable_js` | Security → Bots → JavaScript Detections | Injects `/cdn-cgi/challenge-platform/scripts/jsd/main.js` |
+| `fight_mode` | Security → Bots → Bot Fight Mode | Adds edge protection; also drives the injected detection script |
+
+The injected script trips Lighthouse Best Practices **"Avoid deprecated APIs"**
+and costs roughly 40 Best-Practices points on a fast site, so treat `enable_js:
+true` as a performance finding rather than a security win. Turning both off is a
+tradeoff, not a free fix — it also removes edge bot protection, so say so in the
+report.
+
+```jsonc
+PUT /zones/:zone_id/bot_management
+{ "enable_js": false, "fight_mode": false }
+```
+
+`ai_bots_protection: "block"` is the compromise: it blocks AI scrapers at the
+edge, injects no script, and costs nothing. Prefer it when the user wants bot
+protection without the performance hit.
 
 ## Free managed WAF ruleset
 
