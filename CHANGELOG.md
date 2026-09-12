@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.7.0...pi-cloudflare-v0.8.0) (2026-09-12)
+
+
+### Features
+
+* **skills:** add Workers coverage to cloudflare-hardening audit ([#62](https://github.com/0xPlayerOne/pi-cloudflare/issues/62)) ([5306de7](https://github.com/0xPlayerOne/pi-cloudflare/commit/5306de7817b7856678e6d39178e88f705faf22a4))
+
 ## [0.7.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.10...pi-cloudflare-v0.7.0) (2026-09-12)
 
 
