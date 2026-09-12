@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.8.1...pi-cloudflare-v0.8.2) (2026-09-12)
+
+
+### Documentation
+
+* **skills:** verify the stuck-pending DNSSEC workaround end to end ([#66](https://github.com/0xPlayerOne/pi-cloudflare/issues/66)) ([5b66f39](https://github.com/0xPlayerOne/pi-cloudflare/commit/5b66f39c6d5ba8055f0410bf83dcb40ffb5b8619))
+
 ## [0.8.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.8.0...pi-cloudflare-v0.8.1) (2026-09-12)
 
 
