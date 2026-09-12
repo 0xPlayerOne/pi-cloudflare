@@ -281,10 +281,33 @@ The response carries the record to hand the user:
 <zone>. 3600 IN DS <key_tag> <algorithm> <digest_type> <digest>
 ```
 
-**There is no API to publish the DS.** Confirmed by searching Cloudflare's
-published OpenAPI spec for `dnssec`/`ds_record` in every registrar section (no
-matches) and by writing to the registrar endpoint, which returns `200` and
-ignores the field. The user finishes this in the dashboard or at their registrar.
+**There is no API to publish the DS** — and this matters more than it looks,
+because it splits by registrar:
+
+- **Domain registered with Cloudflare Registrar:** the dashboard's
+  **Enable DNSSEC** button publishes the DS to the registry automatically
+  ("one-click DNSSEC"). An API enablement does **not** trigger that registrar
+  sync, so a zone enabled over the API can sit at `pending` for days even though
+  everything else is correct. The fix is a dashboard visit: toggle DNSSEC off and
+  back on in **DNS → Settings**, which re-runs the flow that publishes the DS.
+  Verified externally by the `ad` flag — a `pending` zone answers without it,
+  an `active` zone answers with it.
+- **Domain registered elsewhere:** add the DS record at that registrar. The zone
+  publishes CDS/CDNSKEY, so a registrar that supports RFC 8078 can pick it up
+  automatically.
+
+Either way the API cannot do the last step: the new
+`/accounts/:id/registrar/registrations/:domain` update endpoint documents
+"currently supports updating `auto_renew` only", `?include=dnssec` is accepted
+and returns nothing, and the dashboard serves a bot challenge to headless
+browsers. Do not promise the user a fully automated DNSSEC rollout.
+
+Confirm the outcome from outside rather than from the API — the zone will read
+`active` or `pending` regardless, so the registry is the source of truth:
+
+```bash
+dig +dnssec <zone> @1.1.1.1 | grep -o "ad"   # ad flag = validating end to end
+```
 
 ## Turnstile
 
