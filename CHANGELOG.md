@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.10...pi-cloudflare-v0.7.0) (2026-09-12)
+
+
+### Features
+
+* **skills:** record the bot-detection performance cost in cloudflare-hardening ([#60](https://github.com/0xPlayerOne/pi-cloudflare/issues/60)) ([680e0a4](https://github.com/0xPlayerOne/pi-cloudflare/commit/680e0a4ee9e0b09e87016104674f2a1874f391aa))
+
 ## [0.6.10](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.6.9...pi-cloudflare-v0.6.10) (2026-09-11)
 
 
