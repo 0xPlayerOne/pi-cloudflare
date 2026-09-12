@@ -1,6 +1,6 @@
 {
   "name": "pi-cloudflare",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Cloudflare Agent Plugin and native Pi extension providing official skills and cf_-prefixed MCP tools.",
   "keywords": [
     "agent-plugin",
