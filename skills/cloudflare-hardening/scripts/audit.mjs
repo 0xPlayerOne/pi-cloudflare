@@ -121,6 +121,9 @@ const RULESET_PHASES = [
   'http_request_firewall_custom',
 ]
 
+// A compatibility date older than this means new runtime behaviour is gated off.
+const COMPAT_CUTOFF = '2024-06-01'
+
 // Headers we expect on a hardened content response. HSTS is handled separately
 // because enabling includeSubDomains needs care and sign-off.
 const EXPECTED_HEADERS = ['x-content-type-options', 'referrer-policy']
@@ -330,6 +333,62 @@ async function auditAccount(account) {
   return summary
 }
 
+/**
+ * Workers inventory: observability, compatibility date, and custom-domain
+ * mapping. Note the domains endpoint ignores worker_name filters, so hostnames
+ * are grouped by their `service` field rather than trusted from a per-worker
+ * query.
+ */
+async function auditWorkers(account) {
+  const accountStart = findings.length
+  const summary = { observabilityOff: [], staleCompat: [] }
+
+  const scripts = await get(`/accounts/${account.id}/workers/scripts`)
+  if (scripts.error) {
+    add(account.name, 'blocked', 'workers', scripts.error, 'grant Workers Scripts read')
+    summary.findings = findings.slice(accountStart)
+    return summary
+  }
+
+  const names = (scripts.result ?? []).map((s) => s.id ?? s.name)
+  summary.workers = names
+
+  for (const name of names) {
+    const settings = await get(`/accounts/${account.id}/workers/scripts/${name}/settings`)
+    if (settings.error) continue
+    const r = settings.result ?? {}
+
+    if (r.observability?.enabled !== true) {
+      summary.observabilityOff.push(name)
+      add(
+        account.name,
+        'medium',
+        `worker ${name}`,
+        'observability is OFF — no logs when it breaks',
+        'PATCH settings with observability enabled (multipart/form-data, not JSON)'
+      )
+    }
+
+    const compat = r.compatibility_date
+    if (compat && compat < COMPAT_CUTOFF) {
+      summary.staleCompat.push(`${name} (${compat})`)
+      add(account.name, 'info', `worker ${name}`, `compatibility_date ${compat} is stale`, 'update to gate in newer runtime behaviour')
+    }
+  }
+
+  const domains = await get(`/accounts/${account.id}/workers/domains`)
+  if (Array.isArray(domains.result)) {
+    summary.customDomains = domains.result.map((d) => ({ hostname: d.hostname, service: d.service }))
+    const previewish = summary.customDomains.filter((d) => /preview|staging|dev\b/i.test(d.hostname))
+    if (previewish.length === 0 && names.some((n) => /preview|staging/i.test(n))) {
+      add(account.name, 'info', 'preview workers', 'no custom domain attached', 'correct by design; preview URLs should sit behind Access')
+    }
+  }
+
+  summary.findings = findings.slice(accountStart)
+  return summary
+}
+
 // --- main ---
 
 const accountsRes = await get('/accounts?per_page=50')
@@ -357,7 +416,11 @@ const auditedZones = []
 for (const zone of zones) auditedZones.push(await auditZone(zone))
 
 const auditedAccounts = []
-for (const account of accounts) auditedAccounts.push(await auditAccount(account))
+for (const account of accounts) {
+  const summary = await auditAccount(account)
+  summary.workers = await auditWorkers(account)
+  auditedAccounts.push(summary)
+}
 
 const report = {
   generatedAt: new Date().toISOString(),
