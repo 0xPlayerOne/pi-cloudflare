@@ -103,6 +103,53 @@ PUT /zones/:zone_id/bot_management
 edge, injects no script, and costs nothing. Prefer it when the user wants bot
 protection without the performance hit.
 
+## Workers
+
+Inventory scripts, then check each one's settings:
+
+```bash
+GET /accounts/:account_id/workers/scripts
+GET /accounts/:account_id/workers/scripts/:script/settings
+```
+
+Three things to check per script:
+
+- **`observability.enabled`** — free, and off by default in some deploy paths.
+  Workers with it off produce no logs when something breaks, so treat an estate
+  with mixed states as a gap and align it.
+- **`compatibility_date`** — anything more than a few months old is worth
+  flagging; stale dates silently gate new runtime behaviour.
+- **`bindings`** — confirm the script has what it needs and nothing orphaned.
+
+Two traps on this endpoint:
+
+- **`PATCH` requires `multipart/form-data`, not JSON.** A JSON body fails with
+  `Content-Type must be one of: multipart/form-data`. Send the settings as a
+  `settings` part:
+
+  ```js
+  const fd = new FormData()
+  fd.append('settings', new Blob([JSON.stringify({
+    observability: { enabled: true, head_sampling_rate: 1 },
+  })], { type: 'application/json' }))
+  fetch(`.../workers/scripts/:script/settings`, { method: 'PATCH', headers, body: fd })
+  ```
+
+- **`GET /accounts/:id/workers/domains` ignores the `worker_name` filter** and
+  returns every custom domain on the account. Do not conclude that several
+  workers share one hostname from that response — map hostnames by the `service`
+  field, or query without a filter and group client-side.
+
+Custom-domain mapping (the clean way):
+
+```bash
+GET /accounts/:account_id/workers/domains
+# each entry: { hostname, service } — service is the worker name
+```
+
+A preview worker should have **no** custom domain; if it does, that is worth
+reporting. Preview URLs should sit behind an Access app.
+
 ## Free managed WAF ruleset
 
 The managed ruleset object **already exists** on every zone but is not applied —
