@@ -290,8 +290,18 @@ because it splits by registrar:
   sync, so a zone enabled over the API can sit at `pending` for days even though
   everything else is correct. The fix is a dashboard visit: toggle DNSSEC off and
   back on in **DNS → Settings**, which re-runs the flow that publishes the DS.
-  Verified externally by the `ad` flag — a `pending` zone answers without it,
-  an `active` zone answers with it.
+
+  Verified live: after the off/on cycle, the DS appeared at the registry within
+  minutes and the zone began validating (the `ad` flag appeared on resolver
+  responses). Publication lands progressively per TLD — two Google-registry TLDs
+  published within ~15 minutes, others queued longer. The zone reads `pending`
+  the whole time, so the registry, not the API, is the only source of truth.
+
+  The cycle through the browser is: **Cancel Setup** → confirm the
+  **Disable DNSSEC** dialog → wait for status `disabled` → **Enable DNSSEC** →
+  confirm → wait for `pending`. Note the confirmation dialog is role
+  `alertdialog`, and the disable is asynchronous — it reached `disabled` on the
+  first poll in every case.
 - **Domain registered elsewhere:** add the DS record at that registrar. The zone
   publishes CDS/CDNSKEY, so a registrar that supports RFC 8078 can pick it up
   automatically.
