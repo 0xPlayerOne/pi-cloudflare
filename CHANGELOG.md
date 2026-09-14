@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.8.2...pi-cloudflare-v0.9.0) (2026-09-14)
+
+
+### Features
+
+* **auth:** authenticate every server with the API token and connect lazily ([#69](https://github.com/0xPlayerOne/pi-cloudflare/issues/69)) ([a5d0d92](https://github.com/0xPlayerOne/pi-cloudflare/commit/a5d0d92109e47d9f26b1d0e2babca734533a00fb))
+
 ## [0.8.2](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.8.1...pi-cloudflare-v0.8.2) (2026-09-12)
 
 
