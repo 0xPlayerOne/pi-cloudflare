@@ -76,6 +76,10 @@ you approve, and tokens (with refresh) are stored owner-only in
 before expiry, and setup skips servers that are still fresh. If a server
 later rejects its token, rerun setup (with `--only` for just that one).
 
+Skip this section entirely when a static API token is configured (see
+Persistent auth below): the token then authenticates every server and
+browser OAuth is never consulted.
+
 Agent Plugins clients use their own token file under `${PLUGIN_DATA}`. When
 authentication is missing or rejected, call the generated
 `cf_<server>_reauthenticate` tool and run the exact command it returns; that
@@ -98,17 +102,24 @@ In `~/.pi/agent/settings.json`:
 
 ## Persistent auth (a month and beyond)
 
+Sessions launch without touching the network: tools register from a local
+cache, and each server connects — authenticating as needed — on its first
+tool call. Token checks and re-authentication prompts therefore only ever
+happen when Cloudflare is actually accessed.
+
 Browser OAuth access tokens live about an hour; both adapters refresh them
 silently before tool calls, so daily use normally does not re-authenticate.
 When refresh itself is rejected (revoked, rotated away by a parallel login,
-or expired), agents get an exact recovery command instead of a dead end — and
-a `cf_<server>_reauthenticate` tool appears with the same instructions.
+or expired), the tool call fails with an exact recovery command instead of a
+dead end — and if a server could not complete its first-run discovery, a
+`cf_<server>_reauthenticate` tool appears with the same instructions.
 
 Two levers for longer-lived credentials:
 
 1. **Static API token (recommended for automation).** A Cloudflare API
-   token never expires. Set it once and the `api` server skips OAuth
-   entirely:
+   token never expires and works as the bearer for every server —
+   `api`, `bindings`, `builds`, and `observability` all accept it (verified
+   against each issuer). Set it once and browser OAuth is never consulted:
 
    ```jsonc
    {
@@ -124,12 +135,12 @@ Two levers for longer-lived credentials:
 
    Create one at dash.cloudflare.com → Manage Account → API Tokens with
    the scopes your agents need (exact template, additions, and account
-   scoping in `docs/api-token.md`). Other servers stay on browser OAuth.
+   scoping in `docs/api-token.md`).
 
-2. **Re-authenticate surgically.** Browser OAuth is the fallback for the
-   other four servers. Tested 2026-09-06: the issuers ignore `offline_access`
-   (a scoped approval returned the standard 1-hour access token), so there is
-   no scope knob — refresh behavior is set server-side.
+2. **Re-authenticate surgically.** Browser OAuth is the fallback when no
+   API token is configured. Tested 2026-09-06: the issuers ignore
+   `offline_access` (a scoped approval returned the standard 1-hour access
+   token), so there is no scope knob — refresh behavior is set server-side.
 
 Avoid re-running full setup on a schedule: each fresh approval can rotate
 away tokens other sessions still hold. Re-authenticate single servers with
@@ -155,13 +166,13 @@ closed on scope). They complement; neither replaces the other.
 
 ## Troubleshooting
 
-| Symptom                                      | Likely cause                            | Fix                                                                                                                  |
-| -------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `Browser connection failed` on session start | A server is down or its token expired   | The extension skips it with a warning and continues; rerun `pi-cloudflare-setup --only <server>` for the failing one |
-| OAuth tab never opens                        | Headless environment or blocked popup   | Copy the printed URL into any browser; native Pi tokens land in `~/.pi/cloudflare-tokens.json`                       |
-| `401` from one server only                   | That server's refresh token was revoked | Call `cf_<server>_reauthenticate` for the host-correct recovery command                                              |
-| Tools missing for a server                   | Disabled in native Pi settings          | Re-enable it; tools register on next session start                                                                   |
-| Rate-limited API calls                       | Too many write calls in a loop          | Back off and batch; prefer one `cf_api_execute` with a precise query over paginated scans                            |
+| Symptom                                    | Likely cause                                                          | Fix                                                                                                                                                                        |
+| ------------------------------------------ | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Launch warning `<server>: unavailable (…)` | First-run tool discovery failed (offline launch, or a rejected token) | Happens once per server; the next successful launch caches the tools and later sessions connect on first use. `pi-cloudflare-setup --only <server>` fixes a rejected token |
+| OAuth tab never opens                      | Headless environment or blocked popup                                 | Copy the printed URL into any browser; native Pi tokens land in `~/.pi/cloudflare-tokens.json`                                                                             |
+| `401` from one server only                 | That server's refresh token was revoked                               | The tool error carries the exact recovery command; with an API token configured, check the token's scopes instead                                                          |
+| Tools missing for a server                 | Disabled in native Pi settings                                        | Re-enable it; tools register on next session start                                                                                                                         |
+| Rate-limited API calls                     | Too many write calls in a loop                                        | Back off and batch; prefer one `cf_api_execute` with a precise query over paginated scans                                                                                  |
 
 ## Development
 
