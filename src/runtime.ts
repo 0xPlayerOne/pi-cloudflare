@@ -10,6 +10,12 @@ import {
   type CloudflareServerId,
 } from './servers.js'
 import {
+  readToolCacheAt,
+  toolsCachePathNear,
+  updateToolCacheAt,
+  type CachedTool,
+} from './tool-cache.js'
+import {
   isExpired,
   readTokenFileAt,
   tokenFilePath,
@@ -21,7 +27,7 @@ interface ServerEntry {
   definition: CloudflareServerDefinition
   connection?: ServerConnection
   stored?: StoredServerTokens
-  /** Static bearer token (api server only): never expires, never refreshes. */
+  /** Static bearer token (API token): never expires, never refreshes, no OAuth. */
   staticToken?: string
   timeoutMs: number
   /** Access token the live connection was built with; drift triggers reconnect. */
@@ -33,10 +39,14 @@ export interface CloudflareRuntimeOptions {
   config?: PiCloudflareConfig
   /** OAuth token file. Defaults to Pi's legacy ~/.pi/cloudflare-tokens.json for compatibility. */
   tokenFile?: string
+  /** Cached upstream tool lists. Defaults to cloudflare-tools-cache.json beside the token file. */
+  toolsCache?: string
   /** Optional local setup script used in portable re-authentication hints. */
   setupScript?: string
   /** Warning sink. Native Pi uses console.warn; the stdio server uses stderr. */
   warn?: (message: string) => void
+  /** Connection factory; overridable in tests. */
+  connect?: typeof connectServer
 }
 
 function quoteArg(value: string): string {
@@ -101,18 +111,30 @@ export function syncFromFile(
   syncFromTokenFile(entry, tokenFilePath(home))
 }
 
+function cacheableTools(tools: CachedTool[]): CachedTool[] {
+  return tools.map((tool) => ({
+    name: tool.name,
+    description: tool.description,
+    inputSchema: tool.inputSchema,
+  }))
+}
+
 export class CloudflareRuntime {
   private entries: ServerEntry[] = []
   private readonly config: PiCloudflareConfig
   private readonly tokenFile: string
+  private readonly toolsCache: string
   private readonly setupScript: string | undefined
   private readonly warn: (message: string) => void
+  private readonly connect: typeof connectServer
 
   constructor(options: CloudflareRuntimeOptions = {}) {
     this.config = options.config ?? {}
     this.tokenFile = options.tokenFile ?? tokenFilePath()
+    this.toolsCache = options.toolsCache ?? toolsCachePathNear(this.tokenFile)
     this.setupScript = options.setupScript
     this.warn = options.warn ?? (() => undefined)
+    this.connect = options.connect ?? connectServer
   }
 
   private hint(serverId: string): string {
@@ -125,7 +147,7 @@ export class CloudflareRuntime {
   private async reconnect(entry: ServerEntry): Promise<void> {
     await entry.connection?.close().catch(() => undefined)
     const token = entry.staticToken ?? entry.stored?.accessToken
-    entry.connection = await connectServer(entry.definition, {
+    entry.connection = await this.connect(entry.definition, {
       apiToken: token,
       timeoutMs: entry.timeoutMs,
     })
@@ -149,99 +171,149 @@ export class CloudflareRuntime {
     await this.reconnect(entry)
   }
 
-  /** Refresh an OAuth token that is expired (or nearly so). Static tokens skip refresh. */
+  /** Resolve the bearer for a call: static API token, else OAuth refreshed when expired. */
   private async ensureFreshToken(entry: ServerEntry): Promise<string | undefined> {
     if (entry.staticToken) return entry.staticToken
     syncFromTokenFile(entry, this.tokenFile)
     const stored = entry.stored
     if (!stored) return undefined
-    if (!isExpired(stored) || !stored.refreshToken) {
-      if (!entry.connection || entry.connectedToken !== stored.accessToken) {
-        await this.reconnect(entry)
-      }
-      return stored.accessToken
-    }
+    if (!isExpired(stored) || !stored.refreshToken) return stored.accessToken
     await this.refreshNow(entry)
     return entry.stored?.accessToken
   }
 
   /**
-   * Connect enabled Cloudflare servers independently and expose one curated
-   * cf_* tool surface. One unavailable server never prevents the others.
+   * Open the connection lazily on first use; a live connection whose token
+   * drifted (rotated by a sibling session) reconnects. After connecting,
+   * refresh the tool cache in the background so the next session starts
+   * without touching the network.
+   */
+  private async ensureConnection(entry: ServerEntry, warmCache = true): Promise<void> {
+    const token = await this.ensureFreshToken(entry)
+    if (!entry.connection || entry.connectedToken !== token) {
+      await this.reconnect(entry)
+      if (warmCache) this.refreshCachedTools(entry)
+    }
+  }
+
+  /** Best-effort cache refresh; never blocks or fails the tool call that triggered it. */
+  private refreshCachedTools(entry: ServerEntry): void {
+    void entry.connection
+      ?.listTools()
+      .then((tools) =>
+        updateToolCacheAt(entry.definition.id, cacheableTools(tools), this.toolsCache)
+      )
+      .catch(() => undefined)
+  }
+
+  /** Wrap registrations so the connection (and its auth) opens on first call. */
+  private registrationsFor(entry: ServerEntry, tools: CachedTool[]): ToolRegistration[] {
+    const registrations = buildAllRegistrations([
+      {
+        prefix: entry.definition.prefix,
+        tools,
+        callTool: async (name, params) => {
+          if (!entry.connection) throw new Error(`${entry.definition.id}: not connected`)
+          return entry.connection.callTool(name, params)
+        },
+      },
+    ])
+    for (const registration of registrations) {
+      const callUpstream = registration.execute
+      registration.execute = async (toolCallId, params, signal) => {
+        try {
+          await this.ensureConnection(entry)
+          return await callUpstream(toolCallId, params, signal)
+        } catch (error) {
+          const detail = error instanceof Error ? error.message : String(error)
+          if (entry.staticToken) {
+            if (isAuthFailure(error)) {
+              throw new Error(
+                `${entry.definition.id}: request rejected (${detail}). ` +
+                  `Check the configured API token (CLOUDFLARE_API_TOKEN) and its scopes.`,
+                { cause: error }
+              )
+            }
+            throw error
+          }
+          if (!isAuthFailure(error)) throw error
+          if (entry.stored?.refreshToken) {
+            try {
+              await this.refreshNow(entry)
+              return await callUpstream(toolCallId, params, signal)
+            } catch {
+              /* fall through to the recovery hint */
+            }
+          }
+          throw new Error(
+            `${entry.definition.id}: request rejected (${detail}). ${this.hint(entry.definition.id)}`,
+            { cause: error }
+          )
+        }
+      }
+    }
+    return registrations
+  }
+
+  /**
+   * Register the cf_* tool surface without touching the network: servers with
+   * a cached tool list register instantly and connect on their first tool
+   * call. Servers without one — first run only — are discovered eagerly so
+   * their tools exist from the very first session.
    */
   async start(): Promise<ToolRegistration[]> {
     await this.stop()
     const registrations: ToolRegistration[] = []
     const config = resolveConfig(this.config)
     const file = readTokenFileAt(this.tokenFile)
+    const cache = readToolCacheAt(this.toolsCache)
     const definitions = CLOUDFLARE_SERVERS.filter((server) =>
       config.enabledServerIds.includes(server.id)
     )
 
     for (const definition of definitions) {
+      // A configured API token is the bearer for every server; OAuth is never consulted.
       const entry: ServerEntry = {
         definition,
         timeoutMs: config.connectTimeoutMs,
-        staticToken: definition.id === 'api' ? this.config.apiToken : undefined,
+        staticToken: this.config.apiToken,
+      }
+      const cached = cache?.servers[definition.id]?.tools
+      if (cached?.length) {
+        registrations.push(...this.registrationsFor(entry, cached))
+        this.entries.push(entry)
+        continue
       }
       try {
         entry.stored = file?.servers[definition.id]
-        await this.ensureFreshToken(entry)
-        if (!entry.connection) await this.reconnect(entry)
+        await this.ensureConnection(entry, false)
         const tools = (await entry.connection?.listTools()) ?? []
-        const serverRegistrations = buildAllRegistrations([
-          {
-            prefix: definition.prefix,
-            tools,
-            callTool: async (name, params) => {
-              if (!entry.connection) throw new Error(`${definition.id}: not connected`)
-              return entry.connection.callTool(name, params)
-            },
-          },
-        ])
-
-        for (const registration of serverRegistrations) {
-          registrations.push({
-            ...registration,
-            execute: async (toolCallId, params, signal) => {
-              try {
-                await this.ensureFreshToken(entry)
-                return await registration.execute(toolCallId, params, signal)
-              } catch (error) {
-                if (!isAuthFailure(error) || entry.staticToken || !entry.stored?.refreshToken) {
-                  throw error
-                }
-                try {
-                  await this.refreshNow(entry)
-                  return await registration.execute(toolCallId, params, signal)
-                } catch {
-                  const detail = error instanceof Error ? error.message : String(error)
-                  throw new Error(
-                    `${definition.id}: request rejected (${detail}). ${this.hint(definition.id)}`
-                  )
-                }
-              }
-            },
-          })
-        }
+        updateToolCacheAt(definition.id, cacheableTools(tools), this.toolsCache)
+        registrations.push(...this.registrationsFor(entry, cacheableTools(tools)))
         this.entries.push(entry)
       } catch (error) {
         this.warn(
           `${definition.id}: unavailable (${error instanceof Error ? error.message : String(error)}).`
         )
         if (isAuthFailure(error)) {
-          const hint = this.hint(definition.id)
-          registrations.push({
-            name: `${definition.prefix}reauthenticate`,
-            label: `${definition.prefix}reauthenticate`,
-            description: `${definition.id} is not authenticated. Call this tool for exact re-authentication instructions.`,
-            inputSchema: { type: 'object', properties: {}, additionalProperties: false },
-            parameters: Type.Object({}),
-            execute: async () => ({
-              content: [{ type: 'text', text: hint }],
-            }),
-          })
-          this.warn(hint)
+          if (entry.staticToken) {
+            this.warn(
+              `${definition.id}: check the configured API token (CLOUDFLARE_API_TOKEN) and its scopes.`
+            )
+          } else {
+            const hint = this.hint(definition.id)
+            registrations.push({
+              name: `${definition.prefix}reauthenticate`,
+              label: `${definition.prefix}reauthenticate`,
+              description: `${definition.id} is not authenticated. Call this tool for exact re-authentication instructions.`,
+              inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+              parameters: Type.Object({}),
+              execute: async () => ({
+                content: [{ type: 'text', text: hint }],
+              }),
+            })
+            this.warn(hint)
+          }
         }
         await entry.connection?.close().catch(() => undefined)
       }

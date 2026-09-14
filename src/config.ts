@@ -7,10 +7,10 @@ export interface PiCloudflareConfig {
   /** Connection timeout per server in milliseconds. */
   connectTimeoutMs?: number
   /**
-   * Static bearer token for the `api` server (e.g. a Cloudflare API token
-   * from ${CLOUDFLARE_API_TOKEN}). Never expires, never needs browser
-   * OAuth, and takes precedence over stored OAuth tokens for that server.
-   * Other servers always use browser OAuth.
+   * Static bearer token applied to every enabled server (e.g. a Cloudflare
+   * API token from ${CLOUDFLARE_API_TOKEN}). Never expires, never needs
+   * browser OAuth — when set, stored OAuth tokens are never consulted — and
+   * takes precedence over stored OAuth tokens.
    */
   apiToken?: string
 }

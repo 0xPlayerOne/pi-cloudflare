@@ -136,8 +136,11 @@ single time.
 
 Export `CLOUDFLARE_API_TOKEN` in your shell profile. Native Pi also falls back
 to the owner-only `~/.pi/cloudflare-api-token` file created by the token-roll
-flow when the environment variable is unavailable. The `api` server then skips
-OAuth entirely; the other four servers stay on browser OAuth.
+flow when the environment variable is unavailable. The token then serves as
+the bearer for every enabled server — `bindings`, `builds`, and
+`observability` accept it exactly like `api` (verified against each issuer
+2026-09-14) — so browser OAuth is never consulted, and sessions launch
+without connecting: each server connects on its first tool call.
 
 ## 5. Verify
 
