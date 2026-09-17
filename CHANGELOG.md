@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.9.1...pi-cloudflare-v0.9.2) (2026-09-17)
+
+
+### Maintenance
+
+* toolchain-alignment ([#74](https://github.com/0xPlayerOne/pi-cloudflare/issues/74)) ([31d5946](https://github.com/0xPlayerOne/pi-cloudflare/commit/31d594610a46e7aecfef8410be57f0a483887ad7))
+
 ## [0.9.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.9.0...pi-cloudflare-v0.9.1) (2026-09-17)
 
 
