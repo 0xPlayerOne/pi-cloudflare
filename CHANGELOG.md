@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.3](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.9.2...pi-cloudflare-v0.9.3) (2026-09-17)
+
+
+### Maintenance
+
+* adopt Code Foundry runtime v1.30.0 ([#76](https://github.com/0xPlayerOne/pi-cloudflare/issues/76)) ([eb35775](https://github.com/0xPlayerOne/pi-cloudflare/commit/eb35775d8fc954639b6fdd50e074cf0e1c6d9339))
+
 ## [0.9.2](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.9.1...pi-cloudflare-v0.9.2) (2026-09-17)
 
 
