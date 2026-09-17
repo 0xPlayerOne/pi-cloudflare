@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawnSync } from 'node:child_process'
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -97,10 +97,50 @@ const forbiddenPackageFiles = [...packageFiles].filter((path) =>
   forbiddenPackagePrefixes.some((prefix) => path.startsWith(prefix))
 )
 
-const lock = JSON.parse(readFileSync(join(root, 'package-lock.json'), 'utf8'))
-const productionDependencies = Object.entries(lock.packages).filter(
-  ([path, metadata]) => path && metadata.dev !== true
-).length
+function productionPackageNames(lock) {
+  const packages = lock.packages ?? {}
+  const workspaceRoot = lock.workspaces?.[''] ?? {}
+  const names = new Set()
+  const pending = Object.keys(workspaceRoot.dependencies ?? {})
+  while (pending.length) {
+    const name = pending.pop()
+    if (!name || names.has(name)) continue
+    const key = Object.keys(packages).find((k) => k === name || k.startsWith(`${name}@`))
+    if (!key) continue
+    names.add(name)
+    const meta = Array.isArray(packages[key]) ? (packages[key][2] ?? {}) : {}
+    for (const dep of Object.keys(meta.dependencies ?? {})) pending.push(dep)
+    for (const dep of Object.keys(meta.optionalDependencies ?? {})) pending.push(dep)
+    for (const dep of Object.keys(meta.peerDependencies ?? {})) {
+      if (meta.peerDependenciesMeta?.[dep]?.optional !== true) pending.push(dep)
+    }
+  }
+  return names
+}
+
+function loadLock() {
+  const bunLockPath = join(root, 'bun.lock')
+  if (existsSync(bunLockPath)) {
+    return JSON.parse(
+      readFileSync(bunLockPath, 'utf8')
+        .split('\n')
+        .filter((line) => !line.trim().startsWith('//'))
+        .map((line) => line.replace(/\s\/\/.*$/, ''))
+        .join('\n')
+        .replace(/,(\s*[}\]])/g, '$1')
+    )
+  }
+  return JSON.parse(readFileSync(join(root, 'package-lock.json'), 'utf8'))
+}
+
+const productionDependencies = (() => {
+  const lock = loadLock()
+  if (lock.lockfileVersion !== undefined) {
+    return productionPackageNames(lock).size
+  }
+  return Object.entries(lock.packages).filter(([path, metadata]) => path && metadata.dev !== true)
+    .length
+})()
 
 const metrics = {
   buildMs: round(buildMs),
