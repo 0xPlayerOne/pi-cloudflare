@@ -108,7 +108,7 @@ function productionPackageNames(lock) {
     const key = Object.keys(packages).find((k) => k === name || k.startsWith(`${name}@`))
     if (!key) continue
     names.add(name)
-    const meta = Array.isArray(packages[key]) ? packages[key][2] ?? {} : {}
+    const meta = Array.isArray(packages[key]) ? (packages[key][2] ?? {}) : {}
     for (const dep of Object.keys(meta.dependencies ?? {})) pending.push(dep)
     for (const dep of Object.keys(meta.optionalDependencies ?? {})) pending.push(dep)
     for (const [dep, range] of Object.entries(meta.peerDependencies ?? {})) {
@@ -138,9 +138,8 @@ const productionDependencies = (() => {
   if (lock.lockfileVersion !== undefined) {
     return productionPackageNames(lock).size
   }
-  return Object.entries(lock.packages).filter(
-    ([path, metadata]) => path && metadata.dev !== true
-  ).length
+  return Object.entries(lock.packages).filter(([path, metadata]) => path && metadata.dev !== true)
+    .length
 })()
 
 const metrics = {
