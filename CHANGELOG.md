@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.4](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.9.3...pi-cloudflare-v0.9.4) (2026-09-18)
+
+
+### Bug Fixes
+
+* complete fleet toolchain alignment ([#78](https://github.com/0xPlayerOne/pi-cloudflare/issues/78)) ([4b13597](https://github.com/0xPlayerOne/pi-cloudflare/commit/4b13597ecffb11d4f83ab22a2d440c0c8406fe28))
+
 ## [0.9.3](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.9.2...pi-cloudflare-v0.9.3) (2026-09-17)
 
 
