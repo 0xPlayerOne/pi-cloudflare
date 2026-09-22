@@ -191,6 +191,73 @@ Do not read a non-`403` on a URI payload as a broken deployment.
 Read the ruleset with `GET /zones/:zone_id/rulesets/:ruleset_id` to inspect the
 signature list on the user's plan.
 
+## Asset caching
+
+Check what the origin actually sends before writing a rule. Most build tools
+already emit the right header for content-hashed files, and a rule that re-sets
+the same header can produce a **duplicated value** rather than a fix:
+
+```
+cache-control: public, max-age=31536000, immutable, public, max-age=31536000, immutable
+```
+
+That duplication means two layers set it (app plus platform). A transform rule
+using `set` collapses it to one value. Prefer that over `add`, which would append
+a third.
+
+Normalise these three shapes, and verify each with a live request:
+
+| Response | Target |
+| --- | --- |
+| Hashed asset (`/assets/index-<hash>.js`, `/_astro/*.<hash>.css`) | `public, max-age=31536000, immutable` |
+| HTML | `public, max-age=0, must-revalidate` |
+| Mutable metadata JSON | revalidate, or a short TTL |
+
+Scope a header rule by **hostname** when a zone serves several apps
+(`http.host eq "app.example.com"`), not with `expression: "true"`. A zone-wide
+`set` silently overrides the per-app headers of every other host in that zone.
+
+### R2 custom domains are not edge-cached
+
+Objects served from an R2 public bucket on a custom domain answer
+`cf-cache-status: DYNAMIC` and **never become `HIT`**, even with an enabled Cache
+Rule that matches the host and path, and even after switching the rule's
+`edge_ttl` from `respect_origin` to an explicit `override_origin`. Zone cache
+rules do not apply to R2 custom-domain traffic.
+
+R2 serves from its own edge, so this is not slow, but it does mean a Cache Rule
+cannot be used to tune it. Caching those objects at the zone edge requires a
+Worker in front of the bucket (Cache API, or `cf: { cacheEverything: true }`).
+Do not promise a cache-rule fix here; check what the user actually needs first.
+
+## Rate-limit vs WAF custom rules (rule budgets)
+
+The Free plan allows **one** rule in the `http_ratelimit` phase, while
+`http_request_firewall_custom` allows several. The dashboard's Leaked Credentials
+template lands in the rate-limit phase, so on a zone where that single slot is
+already spent the add fails with:
+
+```
+50001 exceeded the maximum number of rules in the phase http_ratelimit: 2 out of 1
+```
+
+The same check works in the custom phase, which frees the rate-limit slot:
+
+```jsonc
+PUT /zones/:zone_id/rulesets/phases/http_request_firewall_custom/entrypoint
+{
+  "rules": [{
+    "action": "block",
+    "description": "Leaked credential check",
+    "enabled": true,
+    "expression": "(cf.waf.credential_check.password_leaked)"
+  }]
+}
+```
+
+Match the shape the estate already uses before adding a new one — if some zones
+run it in the rate-limit phase, copy the shape rather than inventing a variant.
+
 ## Response header transform rules
 
 Preserve any rules already in the phase — read the entrypoint first, then PUT the
