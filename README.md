@@ -146,19 +146,31 @@ Avoid re-running full setup on a schedule: each fresh approval can rotate
 away tokens other sessions still hold. Re-authenticate single servers with
 `--only` and only when told to.
 
-## Wrangler CLI vs MCP tools
+## Wrangler, cf CLI, and MCP tools
 
-Both are first-class; pick per task. Credentials do not transfer: wrangler
-bearers are recognized by MCP servers but scope-rejected (verified live),
-so use each where it wins:
+All three are first-class; pick per task. Credentials do not transfer between
+them: wrangler bearers are recognized by MCP servers but scope-rejected
+(verified live), and `cf` reads `CLOUDFLARE_API_TOKEN` from the environment, so
+use each where it wins:
 
 | Task                                         | Use                                            |
 | -------------------------------------------- | ---------------------------------------------- |
 | Deploys, `tail -f`, KV/R2/D1 CLIs, scripting | `wrangler` in bash (durable months-long login) |
+| Full API as typed commands, JSON out         | `cf` CLI (`cf zones list`, `cf d1 ...`)        |
+| Finding the right API operation              | `cf cli search "<intent>"`                     |
 | Endpoint discovery, docs search              | `cf_api_search`, `cf_docs_*`                   |
 | Typed CRUD on bindings with agent-shaped I/O | `cf_bindings_*`                                |
 | Builds history, log exploration              | `cf_builds_*`, `cf_obs_*`                      |
 | Arbitrary API paths with static credentials  | `cf_api_execute` + `apiToken`                  |
+
+Install `cf` with `bun add -g cf` (or `npm i -g cf`); it authenticates from
+`CLOUDFLARE_API_TOKEN`, the same token the MCP servers use. `cf` is Cloudflare's
+agent-first successor surface — JSON output by default and intent-based command
+discovery via `cf cli search` — but it does not replace wrangler: `cf dev`,
+`cf build`, and `cf deploy` delegate to the dev-server each project declares
+(wrangler for legacy Worker projects, `@cloudflare/vite-plugin` for Vite), and
+that delegation expects projects migrated to `cloudflare.config.ts` via
+`cf migrate`. See `skills/cloudflare-cf-cli/SKILL.md`.
 
 Wrangler's months-long session comes from its first-party OAuth grant; MCP
 servers require their own per-server grants (verified: cross-use fails
