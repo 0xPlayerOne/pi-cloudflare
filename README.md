@@ -100,7 +100,7 @@ read and can be deleted.
 
 ```bash
 npm install
-npm run lint          # oxlint
-npm run format:check  # oxfmt
+npm test             # validates the skills library (frontmatter, naming)
+npm run format:check # oxfmt
 bash scripts/sync-skills.sh   # refresh vendored skills from cloudflare/skills
 ```
