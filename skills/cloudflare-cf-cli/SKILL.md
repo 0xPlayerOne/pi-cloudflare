@@ -107,6 +107,38 @@ cannot be deployed by cf at all — wrangler still deploys a bare `index.js` +
 `cloudflare.config.ts` automatically. Do it per project, in that project's
 repo — not estate-wide from outside.
 
+## Deploying without the framework autoconfig trap
+
+Plain `cf deploy` (no flags) runs the **framework-detected build** from
+autoconfig, then uploads whatever Build Output exists. In a monorepo project
+whose build does not emit the Build Output itself, that combination re-runs
+the wrong build and uploads a **stale Build Output** — the deploy succeeds
+while shipping the previous build. The reliable chain for every project:
+
+```bash
+bun run build        # the project's real build (turbo/npm script)
+cf-wrangler build    # refresh .cloudflare/output/v0 from the config pair
+cf deploy --prebuilt # upload the existing Build Output without rebuilding
+```
+
+Three rules that make the chain work, all live-verified:
+
+- **cf discovers its delegate from the nearest `package.json`.** In a
+  workspace, the app package must declare `cf` and `wrangler` in its own
+  devDependencies — root-only placement makes cf fall back to autoconfig
+  (runner `npx`, wrong build command), which under Bun `devEngines` fails
+  with `EBADDEVENGINES`. Declaring `packageManager: "bun@<version>"` in the
+  app manifest fixes the runner.
+- **wrangler ≥ 4.143 understands cf's `defineConfig` marker.** Older
+  wrangler rejects a `cloudflare.config.ts` default export with
+  "not a supported export type" — upgrade wrangler, don't restructure the
+  config.
+- **Multi-module builds need the ESModule rules in `wrangler.config.ts`.**
+  Vite-plugin output (additional `start-assets/` modules) and Nitro's chunk
+  layout only ship when `rules: [{type: "ESModule", globs: ["**/*.js",
+  "**/*.mjs"]}]` is present alongside `noBundle: true`; without them the
+  deploy fails validation with `No such module` (10021).
+
 ## Relationship to the pi-cloudflare MCP servers
 
 The MCP servers are in-session tool calls with structured I/O and result caps;
