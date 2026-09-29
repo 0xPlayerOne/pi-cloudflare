@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.3](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.2...pi-cloudflare-v0.11.3) (2026-09-29)
+
+
+### Maintenance
+
+* **code-foundry:** upgrade to v1.35.0 ([#94](https://github.com/0xPlayerOne/pi-cloudflare/issues/94)) ([0af0295](https://github.com/0xPlayerOne/pi-cloudflare/commit/0af02957bb6d05b83e654f391cbdfd4749dc2b18))
+
 ## [0.11.2](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.1...pi-cloudflare-v0.11.2) (2026-09-29)
 
 
