@@ -88,6 +88,12 @@ Two more traps from real migrations:
   the CI deploy even though local cf commands work — and `cf build` will error
   with `no root config found at .cloudflare/output/v0/config.json` because the
   wrangler bundling step runs via the project's own build, not cf build.
+- **Never launch wrangler under the Bun runtime.** The code-foundry deploy
+  workflow launched it via `bunx --bun`, and one Worker's production deploy
+  failed deterministically with `The object can not be cloned` — while other
+  Workers deployed fine in the same run — plus wrangler's own warning that it
+  does not support the Bun runtime. If a repo's deploy uses a Bun launcher,
+  that is the first thing to check when a deploy fails without a clear error.
 
 A project with **no** manifest (`package.json`/`pyproject.toml`/`Cargo.toml`)
 cannot be deployed by cf at all — wrangler still deploys a bare `index.js` +
