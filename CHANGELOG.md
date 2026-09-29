@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.10.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.9.5...pi-cloudflare-v0.10.0) (2026-09-29)
+
+
+### Features
+
+* **skills:** add cloudflare-cf-cli skill and document the cf CLI ([#83](https://github.com/0xPlayerOne/pi-cloudflare/issues/83)) ([4c79964](https://github.com/0xPlayerOne/pi-cloudflare/commit/4c799649483ed239a9e1934e97e9cf8e484f21b2))
+
+
+### Documentation
+
+* **skills:** record the migration traps hit rolling cf out to the estate ([#85](https://github.com/0xPlayerOne/pi-cloudflare/issues/85)) ([b69cefe](https://github.com/0xPlayerOne/pi-cloudflare/commit/b69cefe6885d28dca2120cadd41a369c8a14fc36))
+
 ## [0.9.5](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.9.4...pi-cloudflare-v0.9.5) (2026-09-22)
 
 
