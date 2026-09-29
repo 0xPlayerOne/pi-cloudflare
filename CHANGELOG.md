@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.5](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.4...pi-cloudflare-v0.11.5) (2026-09-29)
+
+
+### Maintenance
+
+* **ci:** switch Dependabot to bun ecosystem for bun.lock repo ([#82](https://github.com/0xPlayerOne/pi-cloudflare/issues/82)) ([23d8276](https://github.com/0xPlayerOne/pi-cloudflare/commit/23d82765e92086a1f3a136ea4ff5f32f61e24ca0))
+
 ## [0.11.4](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.3...pi-cloudflare-v0.11.4) (2026-09-29)
 
 
