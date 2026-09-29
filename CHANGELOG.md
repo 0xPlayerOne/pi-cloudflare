@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.11.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.10.2...pi-cloudflare-v0.11.0) (2026-09-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* **config:** the cf_* MCP tools no longer register. Use the cf CLI (skills/cloudflare-cf-cli); optionally revoke the old Cloudflare MCP OAuth grants and delete ~/.pi/cloudflare-tokens.json.
+
+### Features
+
+* **config:** cf-first MCP server defaults ([#90](https://github.com/0xPlayerOne/pi-cloudflare/issues/90)) ([d640388](https://github.com/0xPlayerOne/pi-cloudflare/commit/d640388b9092e46ed205a71477d1b9d51cadaf65))
+
 ## [0.10.2](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.10.1...pi-cloudflare-v0.10.2) (2026-09-29)
 
 
