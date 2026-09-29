@@ -1,37 +1,39 @@
 # pi-cloudflare
 
-One package for Cloudflare-driven agent work: **skills + MCP tools + setup
-helper**, distributed both as a native Pi package and an
-[Agent Plugins 1.0](https://agent-plugins.org/) package.
+One package for Cloudflare-driven agent work: **skills only**. The tools live
+in [Cloudflare's `cf` CLI](https://developers.cloudflare.com/fundamentals/tools-and-sdks/cf-cli/)
+— this package ships the knowledge that directs agents to use it well.
 
-- **Skills** (12 vendored from the official
-  [cloudflare/skills](https://github.com/cloudflare/skills) repo: `cloudflare`,
-  `wrangler`, `workers-best-practices`, `durable-objects`, `agents-sdk`,
-  `cloudflare-email-service`, `cloudflare-one`, `cloudflare-one-migrations`,
-  `sandbox-stable`, `sandbox-next`, `sandbox-migrate-to-next`,
-  `turnstile-spin`). Refresh with `scripts/sync-skills.sh`.
-- **MCP tools** — all five official Cloudflare MCP servers, proxied with
-  per-server prefixes (a server that is down or unauthorized is skipped with
-  a warning instead of failing the session):
+- **13 skills vendored from the official
+  [cloudflare/skills](https://github.com/cloudflare/skills) library**:
+  `agents-sdk`, `cloudflare`, `cloudflare-email-service`, `cloudflare-one`,
+  `cloudflare-one-migrations`, `durable-objects`, `nextjs-on-cloudflare`,
+  `sandbox-migrate-to-next`, `sandbox-next`, `sandbox-stable`,
+  `turnstile-spin`, `workers-best-practices`, `wrangler`. Refresh with
+  `scripts/sync-skills.sh`.
+- **5 authored, cf-first skills** born from running a 16-zone Free-plan
+  estate through the cf CLI:
+  - [`cloudflare-cf-cli`](skills/cloudflare-cf-cli/SKILL.md) — install, auth,
+    intent search, and the deploy chain (`cf-wrangler build` → `cf deploy
+--prebuilt`), with the traps that otherwise cost hours (stale Build
+    Output uploads, runner detection, module rules).
+  - [`cloudflare-hardening`](skills/cloudflare-hardening/SKILL.md) — the
+    Free-plan hardening baseline plus a read-only estate audit script.
+  - [`cloudflare-token-scopes`](skills/cloudflare-token-scopes/SKILL.md) —
+    change scopes on an existing API token in place.
+  - [`cloudflare-token-roll`](skills/cloudflare-token-roll/SKILL.md) — roll a
+    leaked token without breaking every consumer at once.
+  - [`cloudflare-api-token`](skills/cloudflare-api-token/SKILL.md) — build
+    the estate token's 141-group scope from the exact permission-group
+    catalog.
 
-  | Tools           | Server                                   |
-  | --------------- | ---------------------------------------- |
-  | `cf_api_*`      | Cloudflare API (2,500+ endpoints)        |
-  | `cf_docs_*`     | Developer documentation (no auth needed) |
-  | `cf_bindings_*` | Workers primitives guidance              |
-  | `cf_builds_*`   | Workers Builds insights                  |
-  | `cf_obs_*`      | Workers logs/metrics/traces              |
+(`web-perf` is intentionally not vendored: keep a local customized copy
+instead, since the upstream version would clobber environment-specific rules.)
 
-Large upstream text results (e.g. full Worker bundles) are truncated to
-32 KiB per text block with a recovery hint instead of landing verbatim in
-agent context. Override locally with `PI_CLOUDFLARE_MAX_TEXT_BYTES` when a
-task genuinely needs more.
-
-Requires Node 20.19+ (or 22.12+) and network access. Native Pi installation
-also requires Pi package support. No browser, wrangler CLI, or API token is
-needed to install; the docs tools work immediately after install.
-
-![Architecture](https://raw.githubusercontent.com/0xPlayerOne/pi-cloudflare/main/docs/assets/architecture.svg)
+Distributed both as a native Pi package and an
+[Agent Plugins 1.0](https://agent-plugins.org/) package. Skills register on
+the next session start after install; no network, browser, or token is
+needed to install.
 
 ## Install
 
@@ -41,168 +43,64 @@ needed to install; the docs tools work immediately after install.
 pi install npm:pi-cloudflare
 ```
 
-Tools and skills register on the **next** session start.
-
 ### Agent Plugins 1.0
 
 The published npm package is also a self-contained Agent Plugin. Its root
-`plugin.json` discovers `skills/`, while `mcp.json` launches the portable
-stdio gateway in `dist/mcp-server.js`.
+`plugin.json` discovers `skills/`. Agent Plugins deliberately leaves
+installation sources to each client — unpack the npm package using the
+client-specific plugin flow, with the package root as `PLUGIN_ROOT`. A raw
+Git checkout works directly (there is nothing to build).
 
-Agent Plugins deliberately leaves installation sources to each client. Install
-or unpack the npm package using the client-specific plugin flow, with the
-package root as `PLUGIN_ROOT`. A raw Git checkout must be built first with
-`npm ci && npm run build`; npm releases already contain `dist/`.
+## Tools: the cf CLI
 
-The portable gateway exposes the same `cf_api_*`, `cf_docs_*`,
-`cf_bindings_*`, `cf_builds_*`, and `cf_obs_*` tool names as the native Pi
-adapter. OAuth state is stored under the client-managed `${PLUGIN_DATA}`
-directory rather than `~/.pi`.
-
-(`web-perf` is intentionally not vendored: keep a local customized copy
-instead, since the upstream version would clobber environment-specific rules.)
-
-## Authenticate (one-time browser OAuth)
+All Cloudflare operations go through the `cf` CLI — the full API as typed
+commands (~3,000 operations), JSON output by default, and intent-based
+command discovery:
 
 ```bash
-npx -p pi-cloudflare pi-cloudflare-setup                  # authorize missing servers
-npx -p pi-cloudflare pi-cloudflare-setup --only builds    # re-auth specific servers
+bun add -g cf            # or: npm i -g cf   (open beta, node >= 22)
+cf cli search "purge cache for a zone"   # intent -> command
+cf zones list                            # JSON out
 ```
 
-Each Cloudflare MCP server is its own OAuth issuer, so approval happens
-once per server (docs needs none): the command opens one tab per server,
-you approve, and tokens (with refresh) are stored owner-only in
-`~/.pi/cloudflare-tokens.json`. The extension refreshes them silently
-before expiry, and setup skips servers that are still fresh. If a server
-later rejects its token, rerun setup (with `--only` for just that one).
+Authenticate from the environment — no OAuth login exists or is needed:
 
-Skip this section entirely when a static API token is configured (see
-Persistent auth below): the token then authenticates every server and
-browser OAuth is never consulted.
-
-Agent Plugins clients use their own token file under `${PLUGIN_DATA}`. When
-authentication is missing or rejected, call the generated
-`cf_<server>_reauthenticate` tool and run the exact command it returns; that
-command includes the plugin-local setup script and the correct data path.
-Nothing is ever logged or committed.
-
-## Configure Pi (optional)
-
-In `~/.pi/agent/settings.json`:
-
-```jsonc
-{
-  "pi-cloudflare": {
-    "servers": { "builds": false }, // disable individual servers
-    "connectTimeoutMs": 30000,
-    // Env override also available: PI_CLOUDFLARE_MAX_TEXT_BYTES (default 32768)
-  },
-}
+```bash
+export CLOUDFLARE_API_TOKEN=...   # scope guidance in docs/api-token.md
+cf auth whoami
 ```
 
-## Persistent auth (a month and beyond)
+| Task                                 | Use                                                 |
+| ------------------------------------ | --------------------------------------------------- |
+| Full API as typed commands, JSON out | `cf` CLI (`cf zones list`, `cf d1 ...`)             |
+| Finding the right API operation      | `cf cli search "<intent>"`                          |
+| Workers deploys and previews         | `cf deploy --prebuilt`, `cf previews deploy`        |
+| KV/R2/D1 CLIs, scripting             | `cf`                                                |
+| Workers primitives guidance          | `workers-best-practices` / `durable-objects` skills |
+| Cloudflare product docs              | developers.cloudflare.com                           |
 
-Sessions launch without touching the network: tools register from a local
-cache, and each server connects — authenticating as needed — on its first
-tool call. Token checks and re-authentication prompts therefore only ever
-happen when Cloudflare is actually accessed.
+`wrangler` remains a per-project devDependency **only** as the dev-server
+implementation that `cf dev`/`cf build`/`cf deploy` delegate to, and for
+`wrangler dev`/`wrangler types` during local development. Never invoke it as
+the deploy interface. See `skills/cloudflare-cf-cli/SKILL.md`.
 
-Browser OAuth access tokens live about an hour; both adapters refresh them
-silently before tool calls, so daily use normally does not re-authenticate.
-When refresh itself is rejected (revoked, rotated away by a parallel login,
-or expired), the tool call fails with an exact recovery command instead of a
-dead end — and if a server could not complete its first-run discovery, a
-`cf_<server>_reauthenticate` tool appears with the same instructions.
+## Migrating from 0.10.x and earlier
 
-Two levers for longer-lived credentials:
-
-1. **Static API token (recommended for automation).** A Cloudflare API
-   token never expires and works as the bearer for every server —
-   `api`, `bindings`, `builds`, and `observability` all accept it (verified
-   against each issuer). Set it once and browser OAuth is never consulted:
-
-   ```jsonc
-   {
-     "pi-cloudflare": {
-       "apiToken": "${CLOUDFLARE_API_TOKEN}", // native Pi
-     },
-   }
-   ```
-
-   Agent Plugin hosts can supply `CLOUDFLARE_API_TOKEN` to the MCP subprocess
-   through their client-specific environment/secret mechanism. Agent Plugins
-   1.0 intentionally does not define a portable secret-reference field.
-
-   Create one at dash.cloudflare.com → Manage Account → API Tokens with
-   the scopes your agents need (exact template, additions, and account
-   scoping in `docs/api-token.md`).
-
-2. **Re-authenticate surgically.** Browser OAuth is the fallback when no
-   API token is configured. Tested 2026-09-06: the issuers ignore
-   `offline_access` (a scoped approval returned the standard 1-hour access
-   token), so there is no scope knob — refresh behavior is set server-side.
-
-Avoid re-running full setup on a schedule: each fresh approval can rotate
-away tokens other sessions still hold. Re-authenticate single servers with
-`--only` and only when told to.
-
-## Wrangler, cf CLI, and MCP tools
-
-All three are first-class; pick per task. Credentials do not transfer between
-them: wrangler bearers are recognized by MCP servers but scope-rejected
-(verified live), and `cf` reads `CLOUDFLARE_API_TOKEN` from the environment, so
-use each where it wins:
-
-| Task                                         | Use                                        |
-| -------------------------------------------- | ------------------------------------------ |
-| Full API as typed commands, JSON out         | `cf` CLI (`cf zones list`, `cf d1 ...`)    |
-| Finding the right API operation              | `cf cli search "<intent>"`                 |
-| Workers deploys (migrated projects)          | `cf deploy`                                |
-| `tail -f`, legacy project dev/deploys        | per-project wrangler (`npx wrangler tail`) |
-| KV/R2/D1 CLIs, scripting                     | `cf`                                       |
-| Endpoint discovery, docs search              | `cf_api_search`, `cf_docs_*`               |
-| Typed CRUD on bindings with agent-shaped I/O | `cf_bindings_*`                            |
-| Builds history, log exploration              | `cf_builds_*`, `cf_obs_*`                  |
-| Arbitrary API paths with static credentials  | `cf_api_execute` + `apiToken`              |
-
-Install `cf` with `bun add -g cf` (or `npm i -g cf`); it authenticates from
-`CLOUDFLARE_API_TOKEN`, the same token the MCP servers use. `cf` is Cloudflare's
-agent-first successor surface — JSON output by default and intent-based command
-discovery via `cf cli search`. There is **no global wrangler install**: each
-project carries wrangler as a devDependency (its dev server and deploy
-implementation), and `cf dev`/`cf build`/`cf deploy` delegate to it — which
-expects projects migrated to `cloudflare.config.ts` via `cf migrate`. Ad-hoc
-wrangler in bash runs per-project via `npx wrangler ...` from the project
-directory. See `skills/cloudflare-cf-cli/SKILL.md`.
-
-Wrangler's months-long session comes from its first-party OAuth grant; MCP
-servers require their own per-server grants (verified: cross-use fails
-closed on scope). They complement; neither replaces the other.
-
-## Troubleshooting
-
-| Symptom                                    | Likely cause                                                          | Fix                                                                                                                                                                        |
-| ------------------------------------------ | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Launch warning `<server>: unavailable (…)` | First-run tool discovery failed (offline launch, or a rejected token) | Happens once per server; the next successful launch caches the tools and later sessions connect on first use. `pi-cloudflare-setup --only <server>` fixes a rejected token |
-| OAuth tab never opens                      | Headless environment or blocked popup                                 | Copy the printed URL into any browser; native Pi tokens land in `~/.pi/cloudflare-tokens.json`                                                                             |
-| `401` from one server only                 | That server's refresh token was revoked                               | The tool error carries the exact recovery command; with an API token configured, check the token's scopes instead                                                          |
-| Tools missing for a server                 | Disabled in native Pi settings                                        | Re-enable it; tools register on next session start                                                                                                                         |
-| Rate-limited API calls                     | Too many write calls in a loop                                        | Back off and batch; prefer one `cf_api_execute` with a precise query over paginated scans                                                                                  |
+Earlier releases proxied the five official Cloudflare MCP servers
+(`cf_api_*`, `cf_docs_*`, `cf_bindings_*`, `cf_builds_*`, `cf_obs_*`). Those
+are **removed**: the cf CLI covers the API, builds, and observability
+surfaces with better ergonomics for agents, and docs/primitives knowledge
+moved to the vendored skills. Re-run `pi install npm:pi-cloudflare` (or
+update the plugin) and start the next session; optionally revoke the old
+browser OAuth grants for the Cloudflare MCP issuers, which are no longer
+used. Stored OAuth tokens under `~/.pi/cloudflare-tokens.json` are no longer
+read and can be deleted.
 
 ## Development
 
 ```bash
 npm install
-npm test    # build + unit tests (mocked, no network)
-npm run perf:check # performance budgets enforced by Code Foundry's performance job
-npm run perf # build/startup/request/package performance report
+npm run lint          # oxlint
+npm run format:check  # oxfmt
+bash scripts/sync-skills.sh   # refresh vendored skills from cloudflare/skills
 ```
-
-Performance budgets, measured surfaces, and the release validation path are documented in
-[`docs/performance.md`](docs/performance.md).
-
-## License
-
-MIT for this package's own code (see LICENSE). Vendored skill content
-under `skills/` remains under its upstream Apache License, Version 2.0
-(see NOTICE).

@@ -1,12 +1,11 @@
-# Long-lived API token for the `api` server
+# Long-lived API token for the cf CLI
 
-Browser OAuth access lasts about an hour (refreshed silently while its own
-grant survives). For automation that must never re-authenticate, use a
-Cloudflare API token: it has no expiry and covers the whole `api` server,
-whose `execute` tool proxies arbitrary `api.cloudflare.com` paths.
+For automation that must never re-authenticate, use a Cloudflare API token:
+it has no expiry, `cf` reads it straight from the environment, and it
+authenticates every API call the estate makes.
 
 OAuth tokens cannot mint API tokens (they are audience-bound to their own
-MCP issuer — verified: `400 Invalid format for Authorization header`), so
+issuer — verified: `400 Invalid format for Authorization header`), so
 this is a one-time dashboard visit. Everything after it is code.
 
 ## 1. Create from the Workers template

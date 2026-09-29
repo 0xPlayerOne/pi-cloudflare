@@ -1,15 +1,15 @@
 {
   "name": "pi-cloudflare",
   "version": "0.10.2",
-  "description": "Cloudflare Agent Plugin and native Pi extension providing official skills and cf_-prefixed MCP tools.",
+  "description": "Cloudflare Agent Plugin: the official Cloudflare skills library plus cf-first hardening and cf CLI skills.",
   "keywords": [
     "agent-plugin",
     "agent-skills",
+    "cf-cli",
     "cloudflare",
-    "extension",
-    "mcp",
     "pi",
-    "pi-package"
+    "pi-package",
+    "skills"
   ],
   "homepage": "https://github.com/0xPlayerOne/pi-cloudflare#readme",
   "bugs": "https://github.com/0xPlayerOne/pi-cloudflare/issues",
@@ -19,59 +19,24 @@
     "type": "git",
     "url": "https://github.com/0xPlayerOne/pi-cloudflare.git"
   },
-  "bin": {
-    "pi-cloudflare-setup": "./bin/setup.mjs"
-  },
   "files": [
-    "dist",
     "skills",
     "plugin.json",
-    "mcp.json",
     "README.md"
   ],
   "type": "module",
-  "sideEffects": false,
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./package.json": {
-      "default": "./package.json"
-    }
-  },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
     "format:check": "oxfmt --check .",
-    "fmt": "oxfmt .",
-    "lint": "oxlint --deny-warnings",
-    "perf": "node scripts/performance-audit.mjs",
-    "perf:check": "node scripts/performance-audit.mjs --check",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "prepublishOnly": "npm run build",
-    "test": "node --test test/config.test.mjs test/servers.test.mjs test/proxy.test.mjs test/oauth.test.mjs test/token-store.test.mjs test/tool-cache.test.mjs test/auth-recovery.test.mjs test/runtime-lazy.test.mjs test/api-token.test.mjs test/result-caps.test.mjs test/plugin.test.mjs",
-    "pretest": "npm run build"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.17.0",
-    "typebox": "*"
+    "fmt": "oxfmt ."
   },
   "devDependencies": {
-    "@types/node": "^26.5.1",
-    "oxfmt": "^0.68.0",
-    "oxlint": "^1.83.0",
-    "typescript": "^6.0.3"
+    "oxfmt": "^0.68.0"
   },
   "engines": {
     "node": "24.18.0"
   },
   "packageManager": "bun@1.4.0",
   "pi": {
-    "extensions": [
-      "./dist/index.js"
-    ],
     "skills": [
       "./skills"
     ]

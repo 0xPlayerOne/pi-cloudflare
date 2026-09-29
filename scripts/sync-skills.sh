@@ -5,7 +5,7 @@
 # operational customization of that skill (see README).
 set -euo pipefail
 
-SKILLS="agents-sdk cloudflare cloudflare-email-service cloudflare-one cloudflare-one-migrations durable-objects sandbox-migrate-to-next sandbox-next sandbox-stable turnstile-spin workers-best-practices wrangler"
+SKILLS="agents-sdk cloudflare cloudflare-email-service cloudflare-one cloudflare-one-migrations durable-objects nextjs-on-cloudflare sandbox-migrate-to-next sandbox-next sandbox-stable turnstile-spin workers-best-practices wrangler"
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="${1:-}"

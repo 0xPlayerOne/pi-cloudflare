@@ -6,9 +6,9 @@ description: Use the Cloudflare cf CLI for estate-wide Cloudflare operations fro
 # Cloudflare cf CLI
 
 `cf` is Cloudflare's agent-first CLI: the full API as typed commands, JSON
-output by default, and intent-based command discovery. It complements the
-pi-cloudflare MCP servers (in-session tool calls) and wrangler (local dev and
-legacy deploys) — it does not replace either.
+output by default, and intent-based command discovery. It is the default
+interface for Cloudflare work in a shell. Wrangler survives only as the
+per-project dev-server implementation cf delegates to.
 
 ## Install and auth
 
@@ -22,7 +22,7 @@ estate's API token is present, and the CLI inherits whatever scope that token
 has:
 
 ```bash
-export CLOUDFLARE_API_TOKEN=...        # same token the MCP servers use
+export CLOUDFLARE_API_TOKEN=...        # the estate's API token
 cf auth whoami                         # authSource: "CLOUDFLARE_API_TOKEN environment variable"
 ```
 
@@ -52,7 +52,7 @@ overrides `CLOUDFLARE_ZONE_ID`), `--profile` (auth profile), `--local`
 | Workers deploys for migrated projects | `cf deploy` |
 | **Local dev** (`cf dev`, `cf build`) | **delegates to the project's dev server** — see below |
 | `wrangler tail` | `wrangler` (cf has no tail command) |
-| Docs lookup, primitives guidance | `cf_docs_*` / `cf_bindings_*` MCP tools |
+| Docs lookup, primitives guidance | developers.cloudflare.com; `workers-best-practices` / `durable-objects` skills |
 
 ## Delegation: why wrangler is still a dependency
 
@@ -105,12 +105,43 @@ cannot be deployed by cf at all — wrangler still deploys a bare `index.js` +
 `cloudflare.config.ts` automatically. Do it per project, in that project's
 repo — not estate-wide from outside.
 
-## Relationship to the pi-cloudflare MCP servers
+## Deploying without the framework autoconfig trap
 
-The MCP servers are in-session tool calls with structured I/O and result caps;
-cf is a subprocess with JSON output. Heavy overlap on the API surface
-(`cf_api_*` vs ~3,000 cf commands), and moderate overlap on builds and
-observability (`cf_builds_*`/`cf_obs_*` vs `cf builds`/`cf observability`).
-Neither is obsolete: pick the MCP for in-session structured calls, cf for
-bash, scripts, and anything the MCP tool surface does not expose. `cf_docs_*`
-and `cf_bindings_*` have no cf equivalent.
+Plain `cf deploy` (no flags) runs the **framework-detected build** from
+autoconfig, then uploads whatever Build Output exists. In a monorepo project
+whose build does not emit the Build Output itself, that combination re-runs
+the wrong build and uploads a **stale Build Output** — the deploy succeeds
+while shipping the previous build. The reliable chain for every project:
+
+```bash
+bun run build        # the project's real build (turbo/npm script)
+cf-wrangler build    # refresh .cloudflare/output/v0 from the config pair
+cf deploy --prebuilt # upload the existing Build Output without rebuilding
+```
+
+Three rules that make the chain work, all live-verified:
+
+- **cf discovers its delegate from the nearest `package.json`.** In a
+  workspace, the app package must declare `cf` and `wrangler` in its own
+  devDependencies — root-only placement makes cf fall back to autoconfig
+  (runner `npx`, wrong build command), which under Bun `devEngines` fails
+  with `EBADDEVENGINES`. Declaring `packageManager: "bun@<version>"` in the
+  app manifest fixes the runner.
+- **wrangler ≥ 4.143 understands cf's `defineConfig` marker.** Older
+  wrangler rejects a `cloudflare.config.ts` default export with
+  "not a supported export type" — upgrade wrangler, don't restructure the
+  config.
+- **Multi-module builds need the ESModule rules in `wrangler.config.ts`.**
+  Vite-plugin output (additional `start-assets/` modules) and Nitro's chunk
+  layout only ship when `rules: [{type: "ESModule", globs: ["**/*.js",
+  "**/*.mjs"]}]` is present alongside `noBundle: true`; without them the
+  deploy fails validation with `No such module` (10021).
+
+## Relationship to wrangler and the old MCP servers
+
+cf is a subprocess with JSON output; the former pi-cloudflare MCP servers
+(`cf_api_*`, `cf_docs_*`, `cf_bindings_*`, `cf_builds_*`, `cf_obs_*`) were
+removed — cf's ~3,000 typed commands plus `cf builds` and `cf
+observability` cover their surfaces, and docs/primitives knowledge lives in
+the vendored Cloudflare skills. Wrangler stays a per-project devDependency
+only as cf's dev-server delegate (see above).
