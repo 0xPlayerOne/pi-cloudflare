@@ -1,6 +1,6 @@
 ---
 name: sandbox-migrate-to-next
-description: Use when porting a Cloudflare Sandbox app from stable @cloudflare/sandbox to @cloudflare/sandbox@next (Sandbox SDK 1.0 preview), or when the user asks to migrate or upgrade to Sandbox 1.0 / @next. Not for day-to-day stable work (sandbox-stable) or new @next apps (sandbox-next).
+description: Migrate Cloudflare Sandbox apps from stable @cloudflare/sandbox to @cloudflare/sandbox@next (SDK 1.0 preview). Use sandbox-next for apps already on the preview.
 ---
 
 # Migrate stable → Sandbox SDK 1.0 preview (`@next`)
@@ -151,7 +151,7 @@ Delete transport settings entirely. Remove session APIs. Isolate users with **se
 
 ### Deploy cutover
 
-Validate a preview deployment first. Production is **one** deploy of matching Worker + image:
+Staging/branch first. Production is **one** deploy of matching Worker + image:
 
 ```sh
 npx wrangler deploy --containers-rollout=immediate

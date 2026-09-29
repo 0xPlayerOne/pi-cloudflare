@@ -7,10 +7,8 @@ description: Use the Cloudflare cf CLI for estate-wide Cloudflare operations fro
 
 `cf` is Cloudflare's agent-first CLI: the full API as typed commands, JSON
 output by default, and intent-based command discovery. It is the default
-interface for Cloudflare work in a shell. The pi-cloudflare MCP servers stay
-available in-session (docs and bindings on by default; api, builds, and
-observability are opt-in because cf covers them), and wrangler survives only
-as the per-project dev-server implementation cf delegates to.
+interface for Cloudflare work in a shell. Wrangler survives only as the
+per-project dev-server implementation cf delegates to.
 
 ## Install and auth
 
@@ -24,7 +22,7 @@ estate's API token is present, and the CLI inherits whatever scope that token
 has:
 
 ```bash
-export CLOUDFLARE_API_TOKEN=...        # same token the MCP servers use
+export CLOUDFLARE_API_TOKEN=...        # the estate's API token
 cf auth whoami                         # authSource: "CLOUDFLARE_API_TOKEN environment variable"
 ```
 
@@ -54,7 +52,7 @@ overrides `CLOUDFLARE_ZONE_ID`), `--profile` (auth profile), `--local`
 | Workers deploys for migrated projects | `cf deploy` |
 | **Local dev** (`cf dev`, `cf build`) | **delegates to the project's dev server** — see below |
 | `wrangler tail` | `wrangler` (cf has no tail command) |
-| Docs lookup, primitives guidance | `cf_docs_*` / `cf_bindings_*` MCP tools |
+| Docs lookup, primitives guidance | developers.cloudflare.com; `workers-best-practices` / `durable-objects` skills |
 
 ## Delegation: why wrangler is still a dependency
 
@@ -139,12 +137,11 @@ Three rules that make the chain work, all live-verified:
   "**/*.mjs"]}]` is present alongside `noBundle: true`; without them the
   deploy fails validation with `No such module` (10021).
 
-## Relationship to the pi-cloudflare MCP servers
+## Relationship to wrangler and the old MCP servers
 
-The MCP servers are in-session tool calls with structured I/O and result caps;
-cf is a subprocess with JSON output. The API, builds, and observability
-servers are **opt-in** in pi-cloudflare (their surface is cf's ~3,000 typed
-commands, `cf builds`, and `cf observability`); docs and bindings remain
-enabled by default because cf has no docs search or primitives guidance.
-Enable the opt-in servers with `"servers": { "api": true }` in Pi settings
-when a task wants in-session structured calls.
+cf is a subprocess with JSON output; the former pi-cloudflare MCP servers
+(`cf_api_*`, `cf_docs_*`, `cf_bindings_*`, `cf_builds_*`, `cf_obs_*`) were
+removed — cf's ~3,000 typed commands plus `cf builds` and `cf
+observability` cover their surfaces, and docs/primitives knowledge lives in
+the vendored Cloudflare skills. Wrangler stays a per-project devDependency
+only as cf's dev-server delegate (see above).
