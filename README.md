@@ -153,24 +153,27 @@ them: wrangler bearers are recognized by MCP servers but scope-rejected
 (verified live), and `cf` reads `CLOUDFLARE_API_TOKEN` from the environment, so
 use each where it wins:
 
-| Task                                         | Use                                            |
-| -------------------------------------------- | ---------------------------------------------- |
-| Deploys, `tail -f`, KV/R2/D1 CLIs, scripting | `wrangler` in bash (durable months-long login) |
-| Full API as typed commands, JSON out         | `cf` CLI (`cf zones list`, `cf d1 ...`)        |
-| Finding the right API operation              | `cf cli search "<intent>"`                     |
-| Endpoint discovery, docs search              | `cf_api_search`, `cf_docs_*`                   |
-| Typed CRUD on bindings with agent-shaped I/O | `cf_bindings_*`                                |
-| Builds history, log exploration              | `cf_builds_*`, `cf_obs_*`                      |
-| Arbitrary API paths with static credentials  | `cf_api_execute` + `apiToken`                  |
+| Task                                         | Use                                        |
+| -------------------------------------------- | ------------------------------------------ |
+| Full API as typed commands, JSON out         | `cf` CLI (`cf zones list`, `cf d1 ...`)    |
+| Finding the right API operation              | `cf cli search "<intent>"`                 |
+| Workers deploys (migrated projects)          | `cf deploy`                                |
+| `tail -f`, legacy project dev/deploys        | per-project wrangler (`npx wrangler tail`) |
+| KV/R2/D1 CLIs, scripting                     | `cf`                                       |
+| Endpoint discovery, docs search              | `cf_api_search`, `cf_docs_*`               |
+| Typed CRUD on bindings with agent-shaped I/O | `cf_bindings_*`                            |
+| Builds history, log exploration              | `cf_builds_*`, `cf_obs_*`                  |
+| Arbitrary API paths with static credentials  | `cf_api_execute` + `apiToken`              |
 
 Install `cf` with `bun add -g cf` (or `npm i -g cf`); it authenticates from
 `CLOUDFLARE_API_TOKEN`, the same token the MCP servers use. `cf` is Cloudflare's
 agent-first successor surface — JSON output by default and intent-based command
-discovery via `cf cli search` — but it does not replace wrangler: `cf dev`,
-`cf build`, and `cf deploy` delegate to the dev-server each project declares
-(wrangler for legacy Worker projects, `@cloudflare/vite-plugin` for Vite), and
-that delegation expects projects migrated to `cloudflare.config.ts` via
-`cf migrate`. See `skills/cloudflare-cf-cli/SKILL.md`.
+discovery via `cf cli search`. There is **no global wrangler install**: each
+project carries wrangler as a devDependency (its dev server and deploy
+implementation), and `cf dev`/`cf build`/`cf deploy` delegate to it — which
+expects projects migrated to `cloudflare.config.ts` via `cf migrate`. Ad-hoc
+wrangler in bash runs per-project via `npx wrangler ...` from the project
+directory. See `skills/cloudflare-cf-cli/SKILL.md`.
 
 Wrangler's months-long session comes from its first-party OAuth grant; MCP
 servers require their own per-server grants (verified: cross-use fails
