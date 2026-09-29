@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.10.0...pi-cloudflare-v0.10.1) (2026-09-29)
+
+
+### Documentation
+
+* **skills:** never launch wrangler under the Bun runtime ([#86](https://github.com/0xPlayerOne/pi-cloudflare/issues/86)) ([d3b1a90](https://github.com/0xPlayerOne/pi-cloudflare/commit/d3b1a901f6c4880a0381da15504587768e324052))
+
 ## [0.10.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.9.5...pi-cloudflare-v0.10.0) (2026-09-29)
 
 
