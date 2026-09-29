@@ -153,17 +153,17 @@ them: wrangler bearers are recognized by MCP servers but scope-rejected
 (verified live), and `cf` reads `CLOUDFLARE_API_TOKEN` from the environment, so
 use each where it wins:
 
-| Task                                         | Use                                            |
-| -------------------------------------------- | ---------------------------------------------- |
-| Full API as typed commands, JSON out         | `cf` CLI (`cf zones list`, `cf d1 ...`)        |
-| Finding the right API operation              | `cf cli search "<intent>"`                     |
-| Workers deploys (migrated projects)          | `cf deploy`                                    |
-| `tail -f`, legacy project dev/deploys        | per-project wrangler (`npx wrangler tail`)     |
-| KV/R2/D1 CLIs, scripting                     | `cf`                                           |
-| Endpoint discovery, docs search              | `cf_api_search`, `cf_docs_*`                   |
-| Typed CRUD on bindings with agent-shaped I/O | `cf_bindings_*`                                |
-| Builds history, log exploration              | `cf_builds_*`, `cf_obs_*`                      |
-| Arbitrary API paths with static credentials  | `cf_api_execute` + `apiToken`                  |
+| Task                                         | Use                                        |
+| -------------------------------------------- | ------------------------------------------ |
+| Full API as typed commands, JSON out         | `cf` CLI (`cf zones list`, `cf d1 ...`)    |
+| Finding the right API operation              | `cf cli search "<intent>"`                 |
+| Workers deploys (migrated projects)          | `cf deploy`                                |
+| `tail -f`, legacy project dev/deploys        | per-project wrangler (`npx wrangler tail`) |
+| KV/R2/D1 CLIs, scripting                     | `cf`                                       |
+| Endpoint discovery, docs search              | `cf_api_search`, `cf_docs_*`               |
+| Typed CRUD on bindings with agent-shaped I/O | `cf_bindings_*`                            |
+| Builds history, log exploration              | `cf_builds_*`, `cf_obs_*`                  |
+| Arbitrary API paths with static credentials  | `cf_api_execute` + `apiToken`              |
 
 Install `cf` with `bun add -g cf` (or `npm i -g cf`); it authenticates from
 `CLOUDFLARE_API_TOKEN`, the same token the MCP servers use. `cf` is Cloudflare's
