@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.2](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.10.1...pi-cloudflare-v0.10.2) (2026-09-29)
+
+
+### Documentation
+
+* no-global-wrangler ([#88](https://github.com/0xPlayerOne/pi-cloudflare/issues/88)) ([29c78ea](https://github.com/0xPlayerOne/pi-cloudflare/commit/29c78ea68dd88243ca6d35c71db5796d2238b3c8))
+
 ## [0.10.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.10.0...pi-cloudflare-v0.10.1) (2026-09-29)
 
 
