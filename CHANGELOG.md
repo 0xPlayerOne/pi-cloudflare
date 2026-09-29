@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.2](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.1...pi-cloudflare-v0.11.2) (2026-09-29)
+
+
+### Maintenance
+
+* add the missing oxlint devDependency ([#95](https://github.com/0xPlayerOne/pi-cloudflare/issues/95)) ([c10dabd](https://github.com/0xPlayerOne/pi-cloudflare/commit/c10dabd1035b9d135ef20c5b1a741472fb7aee78))
+
 ## [0.11.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.0...pi-cloudflare-v0.11.1) (2026-09-29)
 
 
