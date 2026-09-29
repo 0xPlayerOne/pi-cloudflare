@@ -422,6 +422,40 @@ for (const account of accounts) {
   auditedAccounts.push(summary)
 }
 
+
+/**
+ * Collapse findings that repeat across many zones into one line, so a report
+ * about a large estate stays readable. A distinct message still gets its own
+ * line — only exact (subject, message) repeats are aggregated.
+ */
+const emit = (label, list) => {
+  if (list.length === 0) return
+  const collapsed = new Map()
+  for (const finding of list) {
+    const key = `${finding.subject}\u0000${finding.message}\u0000${finding.action ?? ''}`
+    const entry = collapsed.get(key)
+    if (entry) {
+      entry.scopes.push(finding.scope)
+    } else {
+      collapsed.set(key, { ...finding, scopes: [finding.scope] })
+    }
+  }
+
+  console.log(`${label} (${list.length} across ${new Set(list.map((f) => f.scope)).size} subject(s))`)
+  for (const entry of collapsed.values()) {
+    if (entry.scopes.length === 1) {
+      console.log(`  ${entry.scopes[0].padEnd(24)} ${entry.subject.padEnd(32)} ${entry.message}`)
+    } else {
+      const names = entry.scopes.join(', ')
+      const shown = names.length > 90 ? `${names.slice(0, 87)}...` : names
+      console.log(`  ${`${entry.scopes.length} zones`.padEnd(24)} ${entry.subject.padEnd(32)} ${entry.message}`)
+      console.log(`  ${''.padEnd(24)} ${shown}`)
+    }
+    if (entry.action && entry.severity !== 'info') console.log(`  ${''.padEnd(24)} → ${entry.action}`)
+  }
+  console.log('')
+}
+
 const report = {
   generatedAt: new Date().toISOString(),
   accounts: auditedAccounts,
@@ -433,46 +467,13 @@ if (AS_JSON) {
   console.log(JSON.stringify(report, null, 2))
 } else {
   const order = { high: 0, medium: 1, gated: 2, blocked: 3, info: 4 }
-  const sorted = [...findings].sort((a, b) => (order[a.severity] ?? 9) - (order[b.severity] ?? 9))
+  const sorted = findings.toSorted((a, b) => (order[a.severity] ?? 9) - (order[b.severity] ?? 9))
 
   console.log(`Cloudflare estate audit — ${accounts.length} account(s), ${zones.length} zone(s)`)
   console.log(`Plans: ${[...new Set(zones.map((z) => z.plan?.name))].join(', ') || 'unknown'}\n`)
 
   const groups = { high: [], medium: [], gated: [], blocked: [], info: [] }
   for (const finding of sorted) (groups[finding.severity] ?? groups.info).push(finding)
-
-  /**
-   * Collapse findings that repeat across many zones into one line, so a report
-   * about a large estate stays readable. A distinct message still gets its own
-   * line — only exact (subject, message) repeats are aggregated.
-   */
-  const emit = (label, list) => {
-    if (list.length === 0) return
-    const collapsed = new Map()
-    for (const finding of list) {
-      const key = `${finding.subject}\u0000${finding.message}\u0000${finding.action ?? ''}`
-      const entry = collapsed.get(key)
-      if (entry) {
-        entry.scopes.push(finding.scope)
-      } else {
-        collapsed.set(key, { ...finding, scopes: [finding.scope] })
-      }
-    }
-
-    console.log(`${label} (${list.length} across ${new Set(list.map((f) => f.scope)).size} subject(s))`)
-    for (const entry of collapsed.values()) {
-      if (entry.scopes.length === 1) {
-        console.log(`  ${entry.scopes[0].padEnd(24)} ${entry.subject.padEnd(32)} ${entry.message}`)
-      } else {
-        const names = entry.scopes.join(', ')
-        const shown = names.length > 90 ? `${names.slice(0, 87)}...` : names
-        console.log(`  ${`${entry.scopes.length} zones`.padEnd(24)} ${entry.subject.padEnd(32)} ${entry.message}`)
-        console.log(`  ${''.padEnd(24)} ${shown}`)
-      }
-      if (entry.action && entry.severity !== 'info') console.log(`  ${''.padEnd(24)} → ${entry.action}`)
-    }
-    console.log('')
-  }
 
   emit('ACTION NEEDED', groups.high)
   emit('WORTH REVIEWING', groups.medium)

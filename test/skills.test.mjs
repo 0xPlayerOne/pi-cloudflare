@@ -9,7 +9,7 @@ describe('skills library', () => {
     const dirs = (await readdir(skillsRoot, { withFileTypes: true }))
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name)
-      .sort()
+      .toSorted()
     assert.ok(dirs.length >= 15, `expected the full skill set, found ${dirs.length}`)
 
     const names = []
