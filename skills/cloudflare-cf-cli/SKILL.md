@@ -74,6 +74,21 @@ spawns it (via the `cf-wrangler` delegate binary). Two consequences:
    Run `cf migrate` in the project to convert, or keep using `wrangler deploy`
    there until migrated.
 
+Two more traps from real migrations:
+
+- **cf picks the delegation runner from the package manager it detects**, and
+  defaults to `npx`. In a Bun workspace whose `devEngines` rejects npm, every cf
+  build fails with `EBADDEVENGINES Invalid devEngines.packageManager` before
+  anything runs. Declare `packageManager: "bun@<version>"` in the root manifest
+  so cf delegates via `bunx`.
+- **Keep both configs in sync during the transition.** The cf flow reads
+  `cloudflare.config.ts` + `wrangler.config.ts`; the legacy CI deploy (the
+  code-foundry reusable workflow's `wrangler versions upload` / `deploy`)
+  reads `wrangler.jsonc`. Deleting `wrangler.jsonc` after `cf migrate` breaks
+  the CI deploy even though local cf commands work — and `cf build` will error
+  with `no root config found at .cloudflare/output/v0/config.json` because the
+  wrangler bundling step runs via the project's own build, not cf build.
+
 A project with **no** manifest (`package.json`/`pyproject.toml`/`Cargo.toml`)
 cannot be deployed by cf at all — wrangler still deploys a bare `index.js` +
 `wrangler.jsonc`.
