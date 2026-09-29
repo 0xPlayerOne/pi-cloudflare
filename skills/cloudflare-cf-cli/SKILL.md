@@ -6,9 +6,11 @@ description: Use the Cloudflare cf CLI for estate-wide Cloudflare operations fro
 # Cloudflare cf CLI
 
 `cf` is Cloudflare's agent-first CLI: the full API as typed commands, JSON
-output by default, and intent-based command discovery. It complements the
-pi-cloudflare MCP servers (in-session tool calls) and wrangler (local dev and
-legacy deploys) — it does not replace either.
+output by default, and intent-based command discovery. It is the default
+interface for Cloudflare work in a shell. The pi-cloudflare MCP servers stay
+available in-session (docs and bindings on by default; api, builds, and
+observability are opt-in because cf covers them), and wrangler survives only
+as the per-project dev-server implementation cf delegates to.
 
 ## Install and auth
 
@@ -108,9 +110,9 @@ repo — not estate-wide from outside.
 ## Relationship to the pi-cloudflare MCP servers
 
 The MCP servers are in-session tool calls with structured I/O and result caps;
-cf is a subprocess with JSON output. Heavy overlap on the API surface
-(`cf_api_*` vs ~3,000 cf commands), and moderate overlap on builds and
-observability (`cf_builds_*`/`cf_obs_*` vs `cf builds`/`cf observability`).
-Neither is obsolete: pick the MCP for in-session structured calls, cf for
-bash, scripts, and anything the MCP tool surface does not expose. `cf_docs_*`
-and `cf_bindings_*` have no cf equivalent.
+cf is a subprocess with JSON output. The API, builds, and observability
+servers are **opt-in** in pi-cloudflare (their surface is cf's ~3,000 typed
+commands, `cf builds`, and `cf observability`); docs and bindings remain
+enabled by default because cf has no docs search or primitives guidance.
+Enable the opt-in servers with `"servers": { "api": true }` in Pi settings
+when a task wants in-session structured calls.

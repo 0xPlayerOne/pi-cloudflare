@@ -1,8 +1,12 @@
 import type { CloudflareServerId } from './servers.js'
-import { CLOUDFLARE_SERVERS } from './servers.js'
+import { CLOUDFLARE_SERVERS, serverById } from './servers.js'
 
 export interface PiCloudflareConfig {
-  /** Per-server enablement. Omitted servers default to enabled. */
+  /**
+   * Per-server enablement. Omitted servers default to enabled, except the
+   * opt-in servers (api, builds, observability) whose surface the cf CLI
+   * already covers — enable those with `servers.<id>: true`.
+   */
   servers?: Partial<Record<CloudflareServerId, boolean>>
   /** Connection timeout per server in milliseconds. */
   connectTimeoutMs?: number
@@ -24,7 +28,7 @@ const DEFAULT_CONNECT_TIMEOUT_MS = 30_000
 
 export function resolveConfig(config: PiCloudflareConfig | undefined): ResolvedPiCloudflareConfig {
   const enabledServerIds = CLOUDFLARE_SERVERS.map((server) => server.id).filter(
-    (id) => config?.servers?.[id] !== false
+    (id) => config?.servers?.[id] ?? !serverById(id).optIn
   )
   return {
     enabledServerIds,

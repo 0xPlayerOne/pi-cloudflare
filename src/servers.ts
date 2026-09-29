@@ -13,6 +13,12 @@ export interface CloudflareServerDefinition {
   url: string
   /** Whether this server is expected to work without a token. */
   public?: boolean
+  /**
+   * Opt-in servers stay disabled until `servers.<id>: true` is set. The cf
+   * CLI covers these surfaces from a shell (typed commands, JSON output), so
+   * they are opt-in to keep session context lean.
+   */
+  optIn?: boolean
   description: string
 }
 
@@ -21,6 +27,7 @@ export const CLOUDFLARE_SERVERS: readonly CloudflareServerDefinition[] = [
     id: 'api',
     prefix: 'cf_api_',
     url: 'https://mcp.cloudflare.com/mcp',
+    optIn: true,
     description:
       'Full Cloudflare API (2,500+ endpoints: Workers, R2, DNS, Zero Trust) via search and execute tools.',
   },
@@ -41,12 +48,14 @@ export const CLOUDFLARE_SERVERS: readonly CloudflareServerDefinition[] = [
     id: 'builds',
     prefix: 'cf_builds_',
     url: 'https://builds.mcp.cloudflare.com/mcp',
+    optIn: true,
     description: 'Workers Builds insights and management.',
   },
   {
     id: 'observability',
     prefix: 'cf_obs_',
     url: 'https://observability.mcp.cloudflare.com/mcp',
+    optIn: true,
     description: 'Workers logs, metrics, and traces analysis.',
   },
 ]

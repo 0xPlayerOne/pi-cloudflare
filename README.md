@@ -10,17 +10,21 @@ helper**, distributed both as a native Pi package and an
   `cloudflare-email-service`, `cloudflare-one`, `cloudflare-one-migrations`,
   `sandbox-stable`, `sandbox-next`, `sandbox-migrate-to-next`,
   `turnstile-spin`). Refresh with `scripts/sync-skills.sh`.
-- **MCP tools** — all five official Cloudflare MCP servers, proxied with
+- **MCP tools** — the five official Cloudflare MCP servers, proxied with
   per-server prefixes (a server that is down or unauthorized is skipped with
-  a warning instead of failing the session):
+  a warning instead of failing the session). `cf_docs_*` and `cf_bindings_*`
+  are enabled by default; `cf_api_*`, `cf_builds_*`, and `cf_obs_*` are
+  **opt-in** because the [`cf` CLI](#wrangler-cf-cli-and-mcp-tools) covers
+  those surfaces from a shell — enable them with
+  `"servers": { "api": true }` when a task wants in-session structured calls:
 
-  | Tools           | Server                                   |
-  | --------------- | ---------------------------------------- |
-  | `cf_api_*`      | Cloudflare API (2,500+ endpoints)        |
-  | `cf_docs_*`     | Developer documentation (no auth needed) |
-  | `cf_bindings_*` | Workers primitives guidance              |
-  | `cf_builds_*`   | Workers Builds insights                  |
-  | `cf_obs_*`      | Workers logs/metrics/traces              |
+  | Tools           | Server                                   | Default |
+  | --------------- | ---------------------------------------- | ------- |
+  | `cf_api_*`      | Cloudflare API (2,500+ endpoints)        | opt-in  |
+  | `cf_docs_*`     | Developer documentation (no auth needed) | enabled |
+  | `cf_bindings_*` | Workers primitives guidance              | enabled |
+  | `cf_builds_*`   | Workers Builds insights                  | opt-in  |
+  | `cf_obs_*`      | Workers logs/metrics/traces              | opt-in  |
 
 Large upstream text results (e.g. full Worker bundles) are truncated to
 32 KiB per text block with a recovery hint instead of landing verbatim in
@@ -93,7 +97,9 @@ In `~/.pi/agent/settings.json`:
 ```jsonc
 {
   "pi-cloudflare": {
-    "servers": { "builds": false }, // disable individual servers
+    // api, builds, and observability are opt-in (the cf CLI covers them);
+    // docs and bindings are on unless disabled.
+    "servers": { "api": true, "builds": false },
     "connectTimeoutMs": 30000,
     // Env override also available: PI_CLOUDFLARE_MAX_TEXT_BYTES (default 32768)
   },
@@ -148,22 +154,25 @@ away tokens other sessions still hold. Re-authenticate single servers with
 
 ## Wrangler, cf CLI, and MCP tools
 
-All three are first-class; pick per task. Credentials do not transfer between
-them: wrangler bearers are recognized by MCP servers but scope-rejected
-(verified live), and `cf` reads `CLOUDFLARE_API_TOKEN` from the environment, so
-use each where it wins:
+**`cf` is the default interface** for Cloudflare work in a shell. The MCP
+tools complement it in-session (structured calls, result caps); per-project
+wrangler survives only as the dev-server implementation that `cf dev`/`cf
+build`/`cf deploy` delegate to — never invoke it directly. Credentials do not
+transfer between them: wrangler bearers are recognized by MCP servers but
+scope-rejected (verified live), and `cf` reads `CLOUDFLARE_API_TOKEN` from
+the environment, so use each where it wins:
 
-| Task                                         | Use                                        |
-| -------------------------------------------- | ------------------------------------------ |
-| Full API as typed commands, JSON out         | `cf` CLI (`cf zones list`, `cf d1 ...`)    |
-| Finding the right API operation              | `cf cli search "<intent>"`                 |
-| Workers deploys (migrated projects)          | `cf deploy`                                |
-| `tail -f`, legacy project dev/deploys        | per-project wrangler (`npx wrangler tail`) |
-| KV/R2/D1 CLIs, scripting                     | `cf`                                       |
-| Endpoint discovery, docs search              | `cf_api_search`, `cf_docs_*`               |
-| Typed CRUD on bindings with agent-shaped I/O | `cf_bindings_*`                            |
-| Builds history, log exploration              | `cf_builds_*`, `cf_obs_*`                  |
-| Arbitrary API paths with static credentials  | `cf_api_execute` + `apiToken`              |
+| Task                                         | Use                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------- |
+| Full API as typed commands, JSON out         | `cf` CLI (`cf zones list`, `cf d1 ...`)                             |
+| Finding the right API operation              | `cf cli search "<intent>"`                                          |
+| Workers deploys and previews                 | `cf deploy`, `cf previews deploy`                                   |
+| KV/R2/D1 CLIs, scripting                     | `cf`                                                                |
+| Worker log tailing (no `cf` equivalent yet)  | `bunx wrangler tail` from the project directory                     |
+| Endpoint discovery, docs search              | `cf cli search`, `cf_docs_*` (enabled by default)                   |
+| Typed CRUD on bindings with agent-shaped I/O | `cf_bindings_*` (enabled by default)                                |
+| Builds history, log exploration              | `cf builds`, `cf observability`, or opt in `cf_builds_*`/`cf_obs_*` |
+| Arbitrary API paths with static credentials  | `cf` commands (opt in `cf_api_*` when a raw path is needed)         |
 
 Install `cf` with `bun add -g cf` (or `npm i -g cf`); it authenticates from
 `CLOUDFLARE_API_TOKEN`, the same token the MCP servers use. `cf` is Cloudflare's

@@ -12,8 +12,12 @@ const TOOLS = [
   { name: 'probe_tool', description: 'probe', inputSchema: { type: 'object', properties: {} } },
 ]
 
-const API_ONLY = { servers: { docs: false, bindings: false, builds: false, observability: false } }
-const BINDINGS_ONLY = { servers: { api: false, docs: false, builds: false, observability: false } }
+const API_ONLY = {
+  servers: { api: true, docs: false, bindings: false, builds: false, observability: false },
+}
+const BINDINGS_ONLY = {
+  servers: { api: false, docs: false, bindings: true, builds: false, observability: false },
+}
 
 function grant(access, refresh, expiresAt = Date.now() + 3_600_000, tokenEndpoint) {
   return {
