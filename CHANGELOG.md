@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.0...pi-cloudflare-v0.11.1) (2026-09-29)
+
+
+### Documentation
+
+* **readme:** point the development section at npm test ([#92](https://github.com/0xPlayerOne/pi-cloudflare/issues/92)) ([188cae5](https://github.com/0xPlayerOne/pi-cloudflare/commit/188cae5c1d25bc87c133b2139cb8b19b9d843cb6))
+
 ## [0.11.0](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.10.2...pi-cloudflare-v0.11.0) (2026-09-29)
 
 

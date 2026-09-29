@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "pi-cloudflare",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "description": "Cloudflare skills: the official Cloudflare skills library plus cf-first hardening and cf CLI skills. Tools live in the cf CLI, not in this plugin.",
   "author": {
     "name": "0xPlayerOne",
