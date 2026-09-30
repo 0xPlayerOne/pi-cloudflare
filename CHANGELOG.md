@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.7](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.6...pi-cloudflare-v0.11.7) (2026-09-30)
+
+
+### Documentation
+
+* **api-token:** route the token guide through the cf CLI ([#103](https://github.com/0xPlayerOne/pi-cloudflare/issues/103)) ([f65a197](https://github.com/0xPlayerOne/pi-cloudflare/commit/f65a1972316cc9cc2878a601bef074b8d19f725c))
+
 ## [0.11.6](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.5...pi-cloudflare-v0.11.6) (2026-09-30)
 
 
