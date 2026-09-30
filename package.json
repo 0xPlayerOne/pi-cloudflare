@@ -26,6 +26,7 @@
   ],
   "type": "module",
   "scripts": {
+    "test": "node --test test/*.test.mjs",
     "format:check": "oxfmt --check .",
     "fmt": "oxfmt ."
   },
@@ -34,7 +35,7 @@
     "oxlint": "^1.83.0"
   },
   "engines": {
-    "node": "24.18.0"
+    "node": ">=24.18.0"
   },
   "packageManager": "bun@1.4.0",
   "pi": {
