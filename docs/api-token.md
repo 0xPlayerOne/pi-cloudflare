@@ -121,38 +121,31 @@ check, not an API read.
 
 ## 3. Scope the accounts
 
-Under Account Resources, include every account your agents manage (the
-`api` server lists all accounts the token can see). Same for Zone Resources
+Under Account Resources, include every account your agents manage (`cf`
+lists all accounts the token can see). Same for Zone Resources
 if Workers Routes are in play. Copy the token **once** — it is shown a
 single time.
 
 ## 4. Wire it in
 
-```jsonc
-// ~/.pi/agent/settings.json
-{ "pi-cloudflare": { "apiToken": "${CLOUDFLARE_API_TOKEN}" } }
-```
-
-Export `CLOUDFLARE_API_TOKEN` in your shell profile. Native Pi also falls back
-to the owner-only `~/.pi/cloudflare-api-token` file created by the token-roll
-flow when the environment variable is unavailable. The token then serves as
-the bearer for every enabled server — `bindings`, `builds`, and
-`observability` accept it exactly like `api` (verified against each issuer
-2026-09-14) — so browser OAuth is never consulted, and sessions launch
-without connecting: each server connects on its first tool call.
+Export `CLOUDFLARE_API_TOKEN` in your shell profile. The estate also keeps an
+owner-only `~/.pi/cloudflare-api-token` file (`export CLOUDFLARE_API_TOKEN=…`,
+mode `0600`, sourced from the shell profile) that the token-roll flow writes —
+`cf` reads the variable either way, and every command uses the token as its
+bearer.
 
 ## 5. Verify
 
 ```bash
-CLOUDFLARE_API_TOKEN=<paste-once> node scripts/verify-api-token.mjs
+cf auth whoami   # authSource: CLOUDFLARE_API_TOKEN environment variable
 ```
 
-Probes identity, membership, and one live read per audit domain across the
-first discovered account and zone — including every ruleset phase, so a missing
-group is named before an audit starts. Re-run any time agents report auth
-trouble; it distinguishes a dead token from a scoping gap in seconds. It exits
-non-zero only on `403` scope failures (see the status legend in the script), and
-prints `plan` for entitlement-only surfaces so they are not mistaken for gaps.
+For a deeper probe — identity, membership, and one live read per audit domain
+across the first discovered account and zone, including every ruleset phase so
+a missing group is named before an audit starts — run the probe block from
+`skills/cloudflare-api-token/SKILL.md`. It distinguishes a dead token from a
+scoping gap in seconds and exits non-zero only on `403` scope failures;
+`plan` responses are entitlement-only surfaces, not gaps.
 
 ## 6. Builder tips (learned the hard way)
 
