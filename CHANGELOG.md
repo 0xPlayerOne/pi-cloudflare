@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.6](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.5...pi-cloudflare-v0.11.6) (2026-09-30)
+
+
+### Bug Fixes
+
+* **pkg:** declare a Node engine range instead of an exact pin ([#101](https://github.com/0xPlayerOne/pi-cloudflare/issues/101)) ([d738760](https://github.com/0xPlayerOne/pi-cloudflare/commit/d738760157dd446ec1585d4898f7d57074acdd8d))
+
 ## [0.11.5](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.4...pi-cloudflare-v0.11.5) (2026-09-29)
 
 
