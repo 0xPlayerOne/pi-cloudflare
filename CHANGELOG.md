@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.12](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.11...pi-cloudflare-v0.11.12) (2026-10-03)
+
+
+### Maintenance
+
+* **code-foundry:** upgrade runtime to v1.44.3 ([#113](https://github.com/0xPlayerOne/pi-cloudflare/issues/113)) ([c09c69b](https://github.com/0xPlayerOne/pi-cloudflare/commit/c09c69bffe1ec614401d4038e4612b4f0abe9ed3))
+
 ## [0.11.11](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.10...pi-cloudflare-v0.11.11) (2026-10-02)
 
 
