@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.15](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.14...pi-cloudflare-v0.11.15) (2026-10-24)
+
+
+### Maintenance
+
+* update Cloudflare skills for Code Foundry 1.48.8 and Pi 1.4.0 ([#120](https://github.com/0xPlayerOne/pi-cloudflare/issues/120)) ([d75b36b](https://github.com/0xPlayerOne/pi-cloudflare/commit/d75b36b41c6e4406bb7ea116c66956936132c7db))
+
 ## [0.11.14](https://github.com/0xPlayerOne/pi-cloudflare/compare/pi-cloudflare-v0.11.13...pi-cloudflare-v0.11.14) (2026-10-22)
 
 
