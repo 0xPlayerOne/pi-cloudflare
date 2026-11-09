@@ -15,7 +15,7 @@ in [Cloudflare's `cf` CLI](https://developers.cloudflare.com/fundamentals/tools-
   estate through the cf CLI:
   - [`cloudflare-cf-cli`](skills/cloudflare-cf-cli/SKILL.md) — install, auth,
     intent search, and the deploy chain (`cf-wrangler build` → `cf deploy
---prebuilt`), with the traps that otherwise cost hours (stale Build
+    --prebuilt`), with the traps that otherwise cost hours (stale Build
     Output uploads, runner detection, module rules).
   - [`cloudflare-hardening`](skills/cloudflare-hardening/SKILL.md) — the
     Free-plan hardening baseline plus a read-only estate audit script.
